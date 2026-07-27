@@ -1,0 +1,32 @@
+services:
+  database:
+    image: postgres:17-alpine
+    container_name: tracepass-database
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      POSTGRES_DB: ${TRACEPASS_DB_NAME}
+      POSTGRES_USER: ${TRACEPASS_DB_USER}
+      POSTGRES_PASSWORD: ${TRACEPASS_DB_PASSWORD}
+
+    ports:
+      - "${TRACEPASS_DB_PORT}:5432"
+
+    volumes:
+      - tracepass_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${TRACEPASS_DB_USER} -d ${TRACEPASS_DB_NAME}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  tracepass_postgres_data:
