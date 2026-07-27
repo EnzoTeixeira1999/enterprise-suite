@@ -1,0 +1,13 @@
+CREATE TABLE companies (
+    id UUID PRIMARY KEY,
+    legal_name VARCHAR(160) NOT NULL,
+    trade_name VARCHAR(120) NOT NULL,
+    tax_id VARCHAR(32),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uk_companies_tax_id UNIQUE (tax_id),
+    CONSTRAINT ck_companies_status
+        CHECK (status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED'))
+);
