@@ -13,19 +13,14 @@ TracePass
 - Spring Boot funcionando na porta 8080
 - Flyway configurado
 - Tabela companies criada
-- Cadastro de empresas
-- Listagem de empresas
-- Consulta por ID
-- Atualização de empresas
-- Exclusão de empresas
-- Validação dos dados
-- Tratamento de erros
+- CRUD completo de empresas
+- Validação dos dados recebidos
+- Tratamento profissional de erros
 - Proteção contra documento duplicado
+- Testes automatizados do CompanyService
+- Swagger/OpenAPI configurado
+- Documentação visual das rotas
 - CRUD testado manualmente
-
-## Próxima etapa
-
-Criar testes automatizados para o módulo de empresas.
 
 ## Rotas atuais
 
@@ -34,3 +29,12 @@ Criar testes automatizados para o módulo de empresas.
 - GET /api/companies/{id}
 - PUT /api/companies/{id}
 - DELETE /api/companies/{id}
+
+## Páginas locais
+
+- Health: http://localhost:8080/actuator/health
+- Swagger: http://localhost:8080/swagger-ui/index.html
+
+## Próxima etapa
+
+Criar a primeira tela do frontend para visualizar e cadastrar empresas.
