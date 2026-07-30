@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import JourneyMap from "./JourneyMap";
+import PassportQrCode from "./PassportQrCode";
 
 type BatchStatus =
   | "REGISTERED"
@@ -397,6 +398,12 @@ function PublicPassport({
       </section>
 
       <JourneyMap movements={movements} />
+    
+      <PassportQrCode
+        passportId={passport.passportId}
+        productName={batch.productName}
+        batchCode={batch.batchCode}
+      />
 
       <footer className="passport-footer">
         <div>

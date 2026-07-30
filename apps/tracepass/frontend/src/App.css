@@ -2774,3 +2774,184 @@
     line-height: 1.5;
   }
 }
+
+/* QR CODE DO PASSAPORTE */
+
+.passport-qr-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  align-items: center;
+  gap: 60px;
+  margin-top: 28px;
+  padding: clamp(35px, 5vw, 65px);
+  border: 1px solid rgba(91, 220, 255, 0.15);
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      circle at 85% 50%,
+      rgba(82, 242, 191, 0.1),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(9, 39, 56, 0.97),
+      rgba(5, 24, 38, 0.97)
+    );
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.18);
+}
+
+.passport-qr-content > p {
+  margin: 0 0 15px;
+  color: #60e0ff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.passport-qr-content h2 {
+  max-width: 680px;
+  margin: 0;
+  color: #f0f8ff;
+  font-size: clamp(2rem, 4vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.passport-qr-content > span {
+  display: block;
+  max-width: 650px;
+  margin-top: 20px;
+  color: #8eacbe;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.passport-qr-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 36px;
+}
+
+.passport-qr-details > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.passport-qr-details small {
+  color: #52778e;
+  font-size: 0.63rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+
+.passport-qr-details strong {
+  overflow: hidden;
+  color: #dff5ff;
+  font-size: 0.83rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.passport-qr-details code {
+  overflow: hidden;
+  color: #60ddff;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.passport-qr-card {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 26px;
+  border: 1px solid rgba(82, 242, 191, 0.2);
+  border-radius: 24px;
+  background: rgba(3, 21, 33, 0.83);
+  text-align: center;
+}
+
+.passport-qr-code {
+  width: 100%;
+  max-width: 250px;
+  padding: 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 7px rgba(255, 255, 255, 0.035),
+    0 18px 45px rgba(0, 0, 0, 0.28);
+}
+
+.passport-qr-code canvas {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.passport-qr-card > strong {
+  margin-top: 22px;
+  color: #effff9;
+  font-size: 1rem;
+}
+
+.passport-qr-card > span {
+  max-width: 250px;
+  margin-top: 7px;
+  color: #719789;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.passport-qr-card button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 11px;
+  color: #04201a;
+  background: #5ce9bd;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.passport-qr-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 13px 30px rgba(82, 242, 191, 0.2);
+}
+
+@media (max-width: 900px) {
+  .passport-qr-section {
+    grid-template-columns: 1fr;
+  }
+
+  .passport-qr-card {
+    width: 100%;
+    max-width: 340px;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 650px) {
+  .passport-qr-section {
+    gap: 35px;
+    padding: 28px 20px;
+  }
+
+  .passport-qr-details {
+    grid-template-columns: 1fr;
+  }
+
+  .passport-qr-details strong,
+  .passport-qr-details code {
+    white-space: normal;
+    word-break: break-word;
+  }
+}
