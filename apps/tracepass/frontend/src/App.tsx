@@ -6,6 +6,7 @@ import {
 } from "react";
 import "./App.css";
 import ProductPanel from "./components/ProductPanel";
+import BatchPanel from "./components/BatchPanel";
 
 type ApiStatus = "checking" | "online" | "offline";
 type View = "landing" | "dashboard";
@@ -415,8 +416,9 @@ function App() {
               )}
             </article>
           </section>
-          
+
           <ProductPanel companies={companies} />
+          <BatchPanel companies={companies} />
         </section>
       )}
     </main>

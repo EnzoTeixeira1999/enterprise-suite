@@ -47,6 +47,13 @@ TracePass
 - Lotes documentados no Swagger
 - Primeiro lote salvo no PostgreSQL
 - Relação Empresa → Produto → Lote funcionando
+- Painel visual de lotes
+- Seleção de empresa e produto
+- Cadastro de lotes pelo frontend
+- Quantidade disponível por lote
+- Barra visual de disponibilidade
+- Exibição de fabricação e validade
+- Exibição visual do status do lote
 
 ## Rotas atuais
 
@@ -63,4 +70,4 @@ TracePass
 
 ## Próxima etapa
 
-Criar o painel visual de lotes no frontend.
+Criar o módulo de movimentações e a linha do tempo rastreável dos lotes.
