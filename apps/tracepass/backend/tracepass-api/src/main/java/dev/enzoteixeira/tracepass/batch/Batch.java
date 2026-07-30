@@ -1,6 +1,7 @@
 package dev.enzoteixeira.tracepass.batch;
 
 import dev.enzoteixeira.tracepass.product.Product;
+import dev.enzoteixeira.tracepass.supplier.Supplier;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,10 +32,21 @@ public class Batch {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "batch_code", nullable = false, length = 64)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
+    @Column(
+            name = "batch_code",
+            nullable = false,
+            length = 64
+    )
     private String batchCode;
 
-    @Column(name = "manufacture_date", nullable = false)
+    @Column(
+            name = "manufacture_date",
+            nullable = false
+    )
     private LocalDate manufactureDate;
 
     @Column(name = "expiration_date")
@@ -60,10 +72,17 @@ public class Batch {
     @Column(nullable = false, length = 20)
     private BatchStatus status;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(
+            name = "created_at",
+            nullable = false,
+            updatable = false
+    )
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(
+            name = "updated_at",
+            nullable = false
+    )
     private OffsetDateTime updatedAt;
 
     protected Batch() {
@@ -101,13 +120,18 @@ public class Batch {
         this.status = status;
     }
 
+    public void changeSupplier(Supplier supplier) {
+        this.supplier = supplier;
+    }
+
     public void changeStatus(BatchStatus status) {
-    this.status = status;
+        this.status = status;
     }
 
     @PrePersist
     private void beforeInsert() {
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime now =
+                OffsetDateTime.now(ZoneOffset.UTC);
 
         if (id == null) {
             id = UUID.randomUUID();
@@ -127,7 +151,8 @@ public class Batch {
 
     @PreUpdate
     private void beforeUpdate() {
-        updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
+        updatedAt =
+                OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     public UUID getId() {
@@ -136,6 +161,10 @@ public class Batch {
 
     public Product getProduct() {
         return product;
+    }
+
+    public Supplier getSupplier() {
+        return supplier;
     }
 
     public String getBatchCode() {

@@ -9,18 +9,26 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record CreateBatchRequest(
 
         @NotBlank(message = "O código do lote é obrigatório")
-        @Size(max = 64, message = "O código do lote deve possuir no máximo 64 caracteres")
+        @Size(
+                max = 64,
+                message = "O código do lote deve possuir no máximo 64 caracteres"
+        )
         String batchCode,
 
         @NotNull(message = "A data de fabricação é obrigatória")
-        @PastOrPresent(message = "A fabricação não pode estar no futuro")
+        @PastOrPresent(
+                message = "A fabricação não pode estar no futuro"
+        )
         LocalDate manufactureDate,
 
         LocalDate expirationDate,
+
+        UUID supplierId,
 
         @NotNull(message = "A quantidade inicial é obrigatória")
         @DecimalMin(

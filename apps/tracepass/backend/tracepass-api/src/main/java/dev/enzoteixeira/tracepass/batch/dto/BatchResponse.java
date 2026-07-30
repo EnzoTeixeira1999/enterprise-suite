@@ -3,6 +3,7 @@ package dev.enzoteixeira.tracepass.batch.dto;
 import dev.enzoteixeira.tracepass.batch.Batch;
 import dev.enzoteixeira.tracepass.batch.BatchStatus;
 import dev.enzoteixeira.tracepass.product.ProductUnit;
+import dev.enzoteixeira.tracepass.supplier.Supplier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,6 +18,12 @@ public record BatchResponse(
         String productName,
         String productSku,
         ProductUnit productUnit,
+        UUID supplierId,
+        String supplierName,
+        String supplierTaxId,
+        String supplierCity,
+        String supplierState,
+        String supplierCountry,
         String batchCode,
         LocalDate manufactureDate,
         LocalDate expirationDate,
@@ -28,6 +35,8 @@ public record BatchResponse(
 ) {
 
     public static BatchResponse from(Batch batch) {
+        Supplier supplier = batch.getSupplier();
+
         return new BatchResponse(
                 batch.getId(),
                 batch.getProduct().getCompany().getId(),
@@ -36,6 +45,31 @@ public record BatchResponse(
                 batch.getProduct().getName(),
                 batch.getProduct().getSku(),
                 batch.getProduct().getUnit(),
+
+                supplier != null
+                        ? supplier.getId()
+                        : null,
+
+                supplier != null
+                        ? supplier.getTradeName()
+                        : null,
+
+                supplier != null
+                        ? supplier.getTaxId()
+                        : null,
+
+                supplier != null
+                        ? supplier.getCity()
+                        : null,
+
+                supplier != null
+                        ? supplier.getState()
+                        : null,
+
+                supplier != null
+                        ? supplier.getCountry()
+                        : null,
+
                 batch.getBatchCode(),
                 batch.getManufactureDate(),
                 batch.getExpirationDate(),
