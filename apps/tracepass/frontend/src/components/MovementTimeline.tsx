@@ -4,6 +4,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import JourneyMap from "./JourneyMap";
 
 type CompanyOption = {
   id: string;
@@ -686,6 +687,8 @@ function MovementTimeline({
           )}
         </article>
       </div>
+
+      <JourneyMap movements={movements} />
     </section>
   );
 }
