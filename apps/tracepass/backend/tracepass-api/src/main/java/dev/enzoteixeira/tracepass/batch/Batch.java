@@ -101,6 +101,10 @@ public class Batch {
         this.status = status;
     }
 
+    public void changeStatus(BatchStatus status) {
+    this.status = status;
+    }
+
     @PrePersist
     private void beforeInsert() {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);

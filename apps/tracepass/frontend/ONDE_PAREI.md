@@ -54,6 +54,16 @@ TracePass
 - Barra visual de disponibilidade
 - Exibição de fabricação e validade
 - Exibição visual do status do lote
+- Migração V4 da tabela movements
+- Eventos históricos imutáveis
+- Linha do tempo ordenada cronologicamente
+- Localização e coordenadas dos eventos
+- Responsável e quantidade por movimentação
+- Atualização automática do status do lote
+- Eventos documentados no Swagger
+- Evento de produção registrado
+- Evento de armazenamento registrado
+- Lote atualizado automaticamente para IN_STORAGE
 
 ## Rotas atuais
 
@@ -70,4 +80,4 @@ TracePass
 
 ## Próxima etapa
 
-Criar o módulo de movimentações e a linha do tempo rastreável dos lotes.
+Criar a linha do tempo visual das movimentações no frontend.
