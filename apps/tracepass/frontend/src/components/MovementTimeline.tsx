@@ -5,6 +5,7 @@ import {
   type FormEvent,
 } from "react";
 import JourneyMap from "./JourneyMap";
+import LocationPicker from "./LocationPicker";
 
 type CompanyOption = {
   id: string;
@@ -269,7 +270,9 @@ function MovementTimeline({
     void loadMovements();
   }, [loadMovements]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     if (
@@ -315,7 +318,9 @@ function MovementTimeline({
         },
       );
 
-      const responseData = await response.json().catch(() => null);
+      const responseData = await response
+        .json()
+        .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
@@ -361,6 +366,15 @@ function MovementTimeline({
     }).format(new Date(date));
   }
 
+  const previousLocatedMovement =
+    [...movements]
+      .reverse()
+      .find(
+        (movement) =>
+          movement.latitude !== null &&
+          movement.longitude !== null,
+      ) ?? null;
+
   return (
     <section className="movement-module">
       <div className="movement-module__heading">
@@ -368,7 +382,8 @@ function MovementTimeline({
           <p>JORNADA RASTREÁVEL</p>
           <h2>Linha do tempo</h2>
           <span>
-            Eventos permanentes que contam a trajetória completa do lote.
+            Eventos permanentes que contam a trajetória
+            completa do lote.
           </span>
         </div>
 
@@ -384,7 +399,10 @@ function MovementTimeline({
               }}
             >
               {companies.map((company) => (
-                <option value={company.id} key={company.id}>
+                <option
+                  value={company.id}
+                  key={company.id}
+                >
                   {company.tradeName}
                 </option>
               ))}
@@ -406,7 +424,10 @@ function MovementTimeline({
               )}
 
               {products.map((product) => (
-                <option value={product.id} key={product.id}>
+                <option
+                  value={product.id}
+                  key={product.id}
+                >
                   {product.name}
                 </option>
               ))}
@@ -427,7 +448,10 @@ function MovementTimeline({
               )}
 
               {batches.map((batch) => (
-                <option value={batch.id} key={batch.id}>
+                <option
+                  value={batch.id}
+                  key={batch.id}
+                >
                   {batch.batchCode}
                 </option>
               ))}
@@ -543,41 +567,15 @@ function MovementTimeline({
               </label>
             </div>
 
-            <div className="movement-form__row">
-              <label>
-                Latitude
-                <input
-                  type="number"
-                  value={form.latitude}
-                  onChange={(event) =>
-                    updateForm(
-                      "latitude",
-                      event.target.value,
-                    )
-                  }
-                  min="-90"
-                  max="90"
-                  step="0.000001"
-                />
-              </label>
-
-              <label>
-                Longitude
-                <input
-                  type="number"
-                  value={form.longitude}
-                  onChange={(event) =>
-                    updateForm(
-                      "longitude",
-                      event.target.value,
-                    )
-                  }
-                  min="-180"
-                  max="180"
-                  step="0.000001"
-                />
-              </label>
-            </div>
+            <LocationPicker
+              latitude={form.latitude}
+              longitude={form.longitude}
+              origin={previousLocatedMovement}
+              onSelect={(latitude, longitude) => {
+                updateForm("latitude", latitude);
+                updateForm("longitude", longitude);
+              }}
+            />
 
             <label>
               Descrição
@@ -600,11 +598,15 @@ function MovementTimeline({
               type="submit"
               disabled={submitting || !selectedBatchId}
             >
-              {submitting ? "Registrando..." : "Adicionar evento"}
+              {submitting
+                ? "Registrando..."
+                : "Adicionar evento"}
             </button>
 
             {message && (
-              <p className={`feedback feedback--${messageType}`}>
+              <p
+                className={`feedback feedback--${messageType}`}
+              >
                 {message}
               </p>
             )}
@@ -622,7 +624,9 @@ function MovementTimeline({
           </div>
 
           {loading && (
-            <p className="empty-message">Carregando eventos...</p>
+            <p className="empty-message">
+              Carregando eventos...
+            </p>
           )}
 
           {!loading && movements.length === 0 && (
@@ -634,7 +638,10 @@ function MovementTimeline({
           {!loading && (
             <div className="timeline">
               {movements.map((movement, index) => (
-                <article className="timeline-item" key={movement.id}>
+                <article
+                  className="timeline-item"
+                  key={movement.id}
+                >
                   <div className="timeline-item__marker">
                     <span>{index + 1}</span>
                   </div>
@@ -642,11 +649,17 @@ function MovementTimeline({
                   <div className="timeline-item__content">
                     <div className="timeline-item__top">
                       <span>
-                        {movementLabels[movement.movementType]}
+                        {
+                          movementLabels[
+                            movement.movementType
+                          ]
+                        }
                       </span>
 
                       <time>
-                        {formatDateTime(movement.occurredAt)}
+                        {formatDateTime(
+                          movement.occurredAt,
+                        )}
                       </time>
                     </div>
 
@@ -660,7 +673,9 @@ function MovementTimeline({
                       {movement.locationName && (
                         <span>
                           Local
-                          <strong>{movement.locationName}</strong>
+                          <strong>
+                            {movement.locationName}
+                          </strong>
                         </span>
                       )}
 
@@ -676,7 +691,9 @@ function MovementTimeline({
                       {movement.quantity && (
                         <span>
                           Quantidade
-                          <strong>{movement.quantity}</strong>
+                          <strong>
+                            {movement.quantity}
+                          </strong>
                         </span>
                       )}
                     </div>
