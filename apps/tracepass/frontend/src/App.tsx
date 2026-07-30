@@ -8,6 +8,7 @@ import "./App.css";
 import ProductPanel from "./components/ProductPanel";
 import BatchPanel from "./components/BatchPanel";
 import MovementTimeline from "./components/MovementTimeline";
+import PublicPassport from "./components/PublicPassport";
 
 type ApiStatus = "checking" | "online" | "offline";
 type View = "landing" | "dashboard";
@@ -45,6 +46,14 @@ const statusLabels: Record<CompanyStatus, string> = {
   INACTIVE: "Inativa",
   SUSPENDED: "Suspensa",
 };
+
+function getPassportIdFromPath() {
+  const match = window.location.pathname.match(
+    /^\/passport\/([0-9a-f-]{36})\/?$/i,
+  );
+
+  return match?.[1] ?? null;
+}
 
 function App() {
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
@@ -177,6 +186,12 @@ function App() {
   const attentionCompanies = companies.filter(
     (company) => company.status !== "ACTIVE",
   ).length;
+
+  const passportId = getPassportIdFromPath();
+
+  if (passportId) {
+    return <PublicPassport passportId={passportId} />;
+  }
 
   return (
     <main className={`app ${view === "dashboard" ? "app--dashboard" : ""}`}>
