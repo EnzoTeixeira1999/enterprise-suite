@@ -88,6 +88,23 @@ public class MovementService {
     }
 
     @Transactional(readOnly = true)
+    public List<MovementResponse> findAllPublic(
+            UUID batchId
+    ) {
+        if (!batchRepository.existsById(batchId)) {
+            throw new NoSuchElementException(
+                    "Passaporte do lote não encontrado"
+            );
+        }
+
+        return movementRepository
+                .findAllByBatch_IdOrderByOccurredAtAsc(batchId)
+                .stream()
+                .map(MovementResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public MovementResponse findById(
             UUID companyId,
             UUID productId,

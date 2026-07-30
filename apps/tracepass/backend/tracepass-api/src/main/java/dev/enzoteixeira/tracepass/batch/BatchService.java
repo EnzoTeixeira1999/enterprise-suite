@@ -93,6 +93,17 @@ public class BatchService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public BatchResponse findPublicById(UUID batchId) {
+        Batch batch = batchRepository
+                .findById(batchId)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Passaporte do lote não encontrado"
+                ));
+
+        return BatchResponse.from(batch);
+    }
+
     @Transactional
     public BatchResponse update(
             UUID companyId,
@@ -133,7 +144,8 @@ public class BatchService {
                 request.status()
         );
 
-        Batch updatedBatch = batchRepository.saveAndFlush(batch);
+        Batch updatedBatch =
+                batchRepository.saveAndFlush(batch);
 
         return BatchResponse.from(updatedBatch);
     }
@@ -197,6 +209,8 @@ public class BatchService {
     }
 
     private String normalizeBatchCode(String batchCode) {
-        return batchCode.trim().toUpperCase(Locale.ROOT);
+        return batchCode
+                .trim()
+                .toUpperCase(Locale.ROOT);
     }
 }
