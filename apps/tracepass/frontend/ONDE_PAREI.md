@@ -21,6 +21,14 @@ TracePass
 - Swagger/OpenAPI configurado
 - Documentação visual das rotas
 - CRUD testado manualmente
+- Landing page do TracePass
+- Dashboard empresarial
+- Frontend conectado à API
+- Indicadores de empresas
+- Listagem visual de empresas
+- Cadastro de empresas pelo frontend
+- Exibição de erros de documento duplicado
+- Build de produção do frontend validado
 
 ## Rotas atuais
 
