@@ -10,7 +10,12 @@ type CompanyOption = {
   tradeName: string;
 };
 
-type ProductUnit = "UNIT" | "KG" | "LITER" | "BOX" | "METER";
+type ProductUnit =
+  | "UNIT"
+  | "KG"
+  | "LITER"
+  | "BOX"
+  | "METER";
 
 type Product = {
   id: string;
@@ -56,7 +61,9 @@ type BatchPanelProps = {
   companies: CompanyOption[];
 };
 
-const today = new Date().toISOString().slice(0, 10);
+const today = new Date()
+  .toISOString()
+  .slice(0, 10);
 
 const initialForm: BatchForm = {
   batchCode: "",
@@ -82,15 +89,25 @@ const unitLabels: Record<ProductUnit, string> = {
   METER: "metros",
 };
 
-function BatchPanel({ companies }: BatchPanelProps) {
-  const [selectedCompanyId, setSelectedCompanyId] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState("");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [batches, setBatches] = useState<Batch[]>([]);
-  const [form, setForm] = useState<BatchForm>(initialForm);
-  const [loadingProducts, setLoadingProducts] = useState(false);
-  const [loadingBatches, setLoadingBatches] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+function BatchPanel({
+  companies,
+}: BatchPanelProps) {
+  const [selectedCompanyId, setSelectedCompanyId] =
+    useState("");
+  const [selectedProductId, setSelectedProductId] =
+    useState("");
+  const [products, setProducts] =
+    useState<Product[]>([]);
+  const [batches, setBatches] =
+    useState<Batch[]>([]);
+  const [form, setForm] =
+    useState<BatchForm>(initialForm);
+  const [loadingProducts, setLoadingProducts] =
+    useState(false);
+  const [loadingBatches, setLoadingBatches] =
+    useState(false);
+  const [submitting, setSubmitting] =
+    useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<
     "success" | "error"
@@ -105,7 +122,8 @@ function BatchPanel({ companies }: BatchPanelProps) {
     }
 
     const companyExists = companies.some(
-      (company) => company.id === selectedCompanyId,
+      (company) =>
+        company.id === selectedCompanyId,
     );
 
     if (!companyExists) {
@@ -130,11 +148,15 @@ function BatchPanel({ companies }: BatchPanelProps) {
         throw new Error();
       }
 
-      const data: Product[] = await response.json();
+      const data: Product[] =
+        await response.json();
+
       setProducts(data);
     } catch {
       setMessageType("error");
-      setMessage("Não foi possível carregar os produtos.");
+      setMessage(
+        "Não foi possível carregar os produtos.",
+      );
       setProducts([]);
     } finally {
       setLoadingProducts(false);
@@ -153,7 +175,8 @@ function BatchPanel({ companies }: BatchPanelProps) {
     }
 
     const productExists = products.some(
-      (product) => product.id === selectedProductId,
+      (product) =>
+        product.id === selectedProductId,
     );
 
     if (!productExists) {
@@ -162,7 +185,10 @@ function BatchPanel({ companies }: BatchPanelProps) {
   }, [products, selectedProductId]);
 
   const loadBatches = useCallback(async () => {
-    if (!selectedCompanyId || !selectedProductId) {
+    if (
+      !selectedCompanyId ||
+      !selectedProductId
+    ) {
       setBatches([]);
       return;
     }
@@ -179,27 +205,41 @@ function BatchPanel({ companies }: BatchPanelProps) {
         throw new Error();
       }
 
-      const data: Batch[] = await response.json();
+      const data: Batch[] =
+        await response.json();
+
       setBatches(data);
     } catch {
       setMessageType("error");
-      setMessage("Não foi possível carregar os lotes.");
+      setMessage(
+        "Não foi possível carregar os lotes.",
+      );
       setBatches([]);
     } finally {
       setLoadingBatches(false);
     }
-  }, [selectedCompanyId, selectedProductId]);
+  }, [
+    selectedCompanyId,
+    selectedProductId,
+  ]);
 
   useEffect(() => {
     void loadBatches();
   }, [loadBatches]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
-    if (!selectedCompanyId || !selectedProductId) {
+    if (
+      !selectedCompanyId ||
+      !selectedProductId
+    ) {
       setMessageType("error");
-      setMessage("Selecione uma empresa e um produto.");
+      setMessage(
+        "Selecione uma empresa e um produto.",
+      );
       return;
     }
 
@@ -216,14 +256,20 @@ function BatchPanel({ companies }: BatchPanelProps) {
           },
           body: JSON.stringify({
             batchCode: form.batchCode,
-            manufactureDate: form.manufactureDate,
-            expirationDate: form.expirationDate || null,
-            initialQuantity: Number(form.initialQuantity),
+            manufactureDate:
+              form.manufactureDate,
+            expirationDate:
+              form.expirationDate || null,
+            initialQuantity: Number(
+              form.initialQuantity,
+            ),
           }),
         },
       );
 
-      const responseData = await response.json().catch(() => null);
+      const responseData = await response
+        .json()
+        .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
@@ -239,7 +285,9 @@ function BatchPanel({ companies }: BatchPanelProps) {
 
       setForm(initialForm);
       setMessageType("success");
-      setMessage("Lote cadastrado com sucesso.");
+      setMessage(
+        "Lote cadastrado com sucesso.",
+      );
     } catch (error) {
       setMessageType("error");
       setMessage(
@@ -267,7 +315,10 @@ function BatchPanel({ companies }: BatchPanelProps) {
       return "Sem validade";
     }
 
-    return date.split("-").reverse().join("/");
+    return date
+      .split("-")
+      .reverse()
+      .join("/");
   }
 
   function calculatePercentage(batch: Batch) {
@@ -276,7 +327,9 @@ function BatchPanel({ companies }: BatchPanelProps) {
     }
 
     return Math.round(
-      (batch.currentQuantity / batch.initialQuantity) * 100,
+      (batch.currentQuantity /
+        batch.initialQuantity) *
+        100,
     );
   }
 
@@ -287,7 +340,8 @@ function BatchPanel({ companies }: BatchPanelProps) {
           <p>CONTROLE DE LOTES</p>
           <h2>Lotes rastreados</h2>
           <span>
-            Acompanhe fabricação, validade e quantidade disponível.
+            Acompanhe fabricação, validade e
+            quantidade disponível.
           </span>
         </div>
 
@@ -297,18 +351,25 @@ function BatchPanel({ companies }: BatchPanelProps) {
             <select
               value={selectedCompanyId}
               onChange={(event) => {
-                setSelectedCompanyId(event.target.value);
+                setSelectedCompanyId(
+                  event.target.value,
+                );
                 setSelectedProductId("");
                 setProducts([]);
                 setBatches([]);
               }}
             >
               {companies.length === 0 && (
-                <option value="">Nenhuma empresa</option>
+                <option value="">
+                  Nenhuma empresa
+                </option>
               )}
 
               {companies.map((company) => (
-                <option value={company.id} key={company.id}>
+                <option
+                  value={company.id}
+                  key={company.id}
+                >
                   {company.tradeName}
                 </option>
               ))}
@@ -320,16 +381,26 @@ function BatchPanel({ companies }: BatchPanelProps) {
             <select
               value={selectedProductId}
               onChange={(event) =>
-                setSelectedProductId(event.target.value)
+                setSelectedProductId(
+                  event.target.value,
+                )
               }
-              disabled={loadingProducts || products.length === 0}
+              disabled={
+                loadingProducts ||
+                products.length === 0
+              }
             >
               {products.length === 0 && (
-                <option value="">Nenhum produto</option>
+                <option value="">
+                  Nenhum produto
+                </option>
               )}
 
               {products.map((product) => (
-                <option value={product.id} key={product.id}>
+                <option
+                  value={product.id}
+                  key={product.id}
+                >
                   {product.name}
                 </option>
               ))}
@@ -354,7 +425,10 @@ function BatchPanel({ companies }: BatchPanelProps) {
                 type="text"
                 value={form.batchCode}
                 onChange={(event) =>
-                  updateForm("batchCode", event.target.value)
+                  updateForm(
+                    "batchCode",
+                    event.target.value,
+                  )
                 }
                 placeholder="Ex.: LOTE-2026-002"
                 maxLength={64}
@@ -414,13 +488,20 @@ function BatchPanel({ companies }: BatchPanelProps) {
             <button
               className="primary-button"
               type="submit"
-              disabled={submitting || !selectedProductId}
+              disabled={
+                submitting ||
+                !selectedProductId
+              }
             >
-              {submitting ? "Registrando..." : "Registrar lote"}
+              {submitting
+                ? "Registrando..."
+                : "Registrar lote"}
             </button>
 
             {message && (
-              <p className={`feedback feedback--${messageType}`}>
+              <p
+                className={`feedback feedback--${messageType}`}
+              >
                 {message}
               </p>
             )}
@@ -438,25 +519,35 @@ function BatchPanel({ companies }: BatchPanelProps) {
           </div>
 
           {loadingBatches && (
-            <p className="empty-message">Carregando lotes...</p>
-          )}
-
-          {!loadingBatches && batches.length === 0 && (
             <p className="empty-message">
-              Nenhum lote cadastrado para este produto.
+              Carregando lotes...
             </p>
           )}
+
+          {!loadingBatches &&
+            batches.length === 0 && (
+              <p className="empty-message">
+                Nenhum lote cadastrado para
+                este produto.
+              </p>
+            )}
 
           {!loadingBatches && (
             <div className="batch-list">
               {batches.map((batch) => {
-                const percentage = calculatePercentage(batch);
+                const percentage =
+                  calculatePercentage(batch);
 
                 return (
-                  <article className="batch-item" key={batch.id}>
+                  <article
+                    className="batch-item"
+                    key={batch.id}
+                  >
                     <div className="batch-item__top">
                       <div>
-                        <span>{batch.productSku}</span>
+                        <span>
+                          {batch.productSku}
+                        </span>
                         <h4>{batch.batchCode}</h4>
                       </div>
 
@@ -471,10 +562,16 @@ function BatchPanel({ companies }: BatchPanelProps) {
 
                     <div className="batch-quantity">
                       <div>
-                        <span>Quantidade disponível</span>
+                        <span>
+                          Quantidade disponível
+                        </span>
                         <strong>
                           {batch.currentQuantity}{" "}
-                          {unitLabels[batch.productUnit]}
+                          {
+                            unitLabels[
+                              batch.productUnit
+                            ]
+                          }
                         </strong>
                       </div>
 
@@ -482,28 +579,63 @@ function BatchPanel({ companies }: BatchPanelProps) {
                     </div>
 
                     <div className="batch-progress">
-                      <span style={{ width: `${percentage}%` }} />
+                      <span
+                        style={{
+                          width: `${percentage}%`,
+                        }}
+                      />
                     </div>
 
                     <div className="batch-dates">
                       <span>
                         Fabricação
                         <strong>
-                          {formatDate(batch.manufactureDate)}
+                          {formatDate(
+                            batch.manufactureDate,
+                          )}
                         </strong>
                       </span>
 
                       <span>
                         Validade
                         <strong>
-                          {formatDate(batch.expirationDate)}
+                          {formatDate(
+                            batch.expirationDate,
+                          )}
                         </strong>
                       </span>
 
                       <span>
                         Quantidade inicial
-                        <strong>{batch.initialQuantity}</strong>
+                        <strong>
+                          {batch.initialQuantity}
+                        </strong>
                       </span>
+                    </div>
+
+                    <div className="batch-item__actions">
+                      <div>
+                        <span>
+                          PASSAPORTE DIGITAL
+                        </span>
+                        <small>
+                          Consulta pública, mapa e
+                          QR Code
+                        </small>
+                      </div>
+
+                      <a
+                        className="batch-passport-link"
+                        href={`/passport/${batch.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Abrir passaporte público do lote ${batch.batchCode}`}
+                      >
+                        Ver passaporte
+                        <span aria-hidden="true">
+                          ↗
+                        </span>
+                      </a>
                     </div>
                   </article>
                 );
