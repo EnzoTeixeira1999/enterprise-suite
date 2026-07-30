@@ -7,6 +7,7 @@ import {
 import "./App.css";
 import ProductPanel from "./components/ProductPanel";
 import BatchPanel from "./components/BatchPanel";
+import MovementTimeline from "./components/MovementTimeline";
 
 type ApiStatus = "checking" | "online" | "offline";
 type View = "landing" | "dashboard";
@@ -419,6 +420,7 @@ function App() {
 
           <ProductPanel companies={companies} />
           <BatchPanel companies={companies} />
+          <MovementTimeline companies={companies} />
         </section>
       )}
     </main>

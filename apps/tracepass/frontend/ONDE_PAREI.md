@@ -64,6 +64,13 @@ TracePass
 - Evento de produção registrado
 - Evento de armazenamento registrado
 - Lote atualizado automaticamente para IN_STORAGE
+- Linha do tempo visual no frontend
+- Formulário visual de movimentações
+- Filtros por empresa, produto e lote
+- Eventos apresentados em ordem cronológica
+- Produção, armazenamento e transporte registrados
+- Lote alterado automaticamente para IN_TRANSIT
+- Histórico imutável demonstrado visualmente
 
 ## Rotas atuais
 
@@ -80,4 +87,4 @@ TracePass
 
 ## Próxima etapa
 
-Criar a linha do tempo visual das movimentações no frontend.
+Criar o mapa visual da jornada usando as coordenadas das movimentações.
