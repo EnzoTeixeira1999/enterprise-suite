@@ -38,6 +38,15 @@ TracePass
 - Cadastro de produtos pelo frontend
 - Filtro de produtos por empresa
 - Proteção contra SKU duplicado
+- Migração V3 da tabela batches
+- Entidade e repositório de lotes
+- CRUD de lotes no backend
+- Validação de fabricação e validade
+- Validação das quantidades
+- Proteção contra código de lote duplicado
+- Lotes documentados no Swagger
+- Primeiro lote salvo no PostgreSQL
+- Relação Empresa → Produto → Lote funcionando
 
 ## Rotas atuais
 
@@ -54,4 +63,4 @@ TracePass
 
 ## Próxima etapa
 
-Criar o módulo de lotes vinculados aos produtos.
+Criar o painel visual de lotes no frontend.
