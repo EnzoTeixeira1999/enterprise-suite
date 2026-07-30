@@ -29,6 +29,15 @@ TracePass
 - Cadastro de empresas pelo frontend
 - Exibição de erros de documento duplicado
 - Build de produção do frontend validado
+- Migração V2 da tabela products
+- Entidade e repositório de produtos
+- CRUD de produtos no backend
+- Produtos documentados no Swagger
+- Primeiro produto salvo no PostgreSQL
+- Painel visual de produtos
+- Cadastro de produtos pelo frontend
+- Filtro de produtos por empresa
+- Proteção contra SKU duplicado
 
 ## Rotas atuais
 
@@ -45,4 +54,4 @@ TracePass
 
 ## Próxima etapa
 
-Criar a primeira tela do frontend para visualizar e cadastrar empresas.
+Criar o módulo de lotes vinculados aos produtos.

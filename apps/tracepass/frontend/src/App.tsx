@@ -5,6 +5,7 @@ import {
   type FormEvent,
 } from "react";
 import "./App.css";
+import ProductPanel from "./components/ProductPanel";
 
 type ApiStatus = "checking" | "online" | "offline";
 type View = "landing" | "dashboard";
@@ -414,6 +415,8 @@ function App() {
               )}
             </article>
           </section>
+          
+          <ProductPanel companies={companies} />
         </section>
       )}
     </main>
