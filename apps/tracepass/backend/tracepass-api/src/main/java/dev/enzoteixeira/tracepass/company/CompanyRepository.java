@@ -10,4 +10,6 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
     Optional<Company> findByTaxId(String taxId);
 
     boolean existsByTaxId(String taxId);
+
+    boolean existsByTaxIdAndIdNot(String taxId, UUID id);
 }

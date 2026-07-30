@@ -51,7 +51,17 @@ public class Company {
         this.taxId = taxId;
         this.status = CompanyStatus.ACTIVE;
     }
-
+    public void update(
+        String legalName,
+        String tradeName,
+        String taxId,
+        CompanyStatus status
+) {
+    this.legalName = legalName;
+    this.tradeName = tradeName;
+    this.taxId = taxId;
+    this.status = status;
+}
     @PrePersist
     private void beforeInsert() {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);

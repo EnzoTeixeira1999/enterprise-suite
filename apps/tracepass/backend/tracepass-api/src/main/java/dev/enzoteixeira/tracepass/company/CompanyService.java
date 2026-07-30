@@ -2,6 +2,7 @@ package dev.enzoteixeira.tracepass.company;
 
 import dev.enzoteixeira.tracepass.company.dto.CompanyResponse;
 import dev.enzoteixeira.tracepass.company.dto.CreateCompanyRequest;
+import dev.enzoteixeira.tracepass.company.dto.UpdateCompanyRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,8 +50,43 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public CompanyResponse findById(UUID id) {
+        return CompanyResponse.from(findEntityById(id));
+    }
+
+    @Transactional
+    public CompanyResponse update(
+            UUID id,
+            UpdateCompanyRequest request
+    ) {
+        Company company = findEntityById(id);
+        String taxId = request.taxId().trim();
+
+        if (companyRepository.existsByTaxIdAndIdNot(taxId, id)) {
+            throw new IllegalArgumentException(
+                    "Já existe outra empresa cadastrada com esse documento"
+            );
+        }
+
+        company.update(
+                request.legalName().trim(),
+                request.tradeName().trim(),
+                taxId,
+                request.status()
+        );
+
+        Company updatedCompany = companyRepository.saveAndFlush(company);
+
+        return CompanyResponse.from(updatedCompany);
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Company company = findEntityById(id);
+        companyRepository.delete(company);
+    }
+
+    private Company findEntityById(UUID id) {
         return companyRepository.findById(id)
-                .map(CompanyResponse::from)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Empresa não encontrada"
                 ));
