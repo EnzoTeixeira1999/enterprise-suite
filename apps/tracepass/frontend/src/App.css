@@ -3388,3 +3388,135 @@
     flex-direction: column;
   }
 }
+
+.batch-supplier-select {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 48px 0 18px;
+  border: 1px solid rgba(112, 189, 226, 0.18);
+  border-radius: 13px;
+  color: #f0f8ff;
+  background-color: #03131f;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.batch-supplier-select:focus {
+  border-color: rgba(255, 184, 77, 0.75);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 184, 77, 0.08);
+}
+
+.batch-supplier-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.batch-supplier-help {
+  display: block;
+  margin-top: 8px;
+  color: #668ca6;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.batch-origin-card {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 15px;
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px solid rgba(255, 183, 77, 0.22);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 177, 66, 0.08),
+      rgba(7, 30, 45, 0.72)
+    );
+}
+
+.batch-origin-card__symbol {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px solid rgba(255, 183, 77, 0.42);
+  border-radius: 14px;
+  color: #ffbd58;
+  background: rgba(255, 177, 66, 0.1);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.batch-origin-card__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.batch-origin-card__content > span {
+  color: #ffb849;
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.batch-origin-card__content strong {
+  overflow: hidden;
+  color: #f2f8ff;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.batch-origin-card__content small {
+  overflow: hidden;
+  color: #79a0b9;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.batch-origin-card__status {
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 183, 77, 0.2);
+  border-radius: 999px;
+  color: #ffc667;
+  background: rgba(255, 177, 66, 0.08);
+  font-size: 0.67rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.batch-origin-card--missing {
+  border-color: rgba(255, 110, 119, 0.2);
+  background: rgba(255, 110, 119, 0.05);
+}
+
+.batch-origin-card--missing
+  .batch-origin-card__symbol {
+  border-color: rgba(255, 110, 119, 0.3);
+  color: #ff7d86;
+  background: rgba(255, 110, 119, 0.08);
+}
+
+.batch-origin-card--missing
+  .batch-origin-card__status {
+  color: #ff9299;
+}
+
+@media (max-width: 760px) {
+  .batch-origin-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .batch-origin-card__status {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+}

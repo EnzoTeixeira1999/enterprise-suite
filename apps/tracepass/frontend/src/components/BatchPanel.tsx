@@ -24,6 +24,22 @@ type Product = {
   unit: ProductUnit;
 };
 
+type SupplierStatus =
+  | "ACTIVE"
+  | "INACTIVE"
+  | "SUSPENDED";
+
+type Supplier = {
+  id: string;
+  tradeName: string;
+  legalName: string;
+  taxId: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  status: SupplierStatus;
+};
+
 type BatchStatus =
   | "REGISTERED"
   | "IN_STORAGE"
@@ -40,6 +56,14 @@ type Batch = {
   productName: string;
   productSku: string;
   productUnit: ProductUnit;
+
+  supplierId: string | null;
+  supplierName: string | null;
+  supplierTaxId: string | null;
+  supplierCity: string | null;
+  supplierState: string | null;
+  supplierCountry: string | null;
+
   batchCode: string;
   manufactureDate: string;
   expirationDate: string | null;
@@ -52,6 +76,7 @@ type Batch = {
 
 type BatchForm = {
   batchCode: string;
+  supplierId: string;
   manufactureDate: string;
   expirationDate: string;
   initialQuantity: string;
@@ -67,6 +92,7 @@ const today = new Date()
 
 const initialForm: BatchForm = {
   batchCode: "",
+  supplierId: "",
   manufactureDate: today,
   expirationDate: "",
   initialQuantity: "",
@@ -92,31 +118,57 @@ const unitLabels: Record<ProductUnit, string> = {
 function BatchPanel({
   companies,
 }: BatchPanelProps) {
-  const [selectedCompanyId, setSelectedCompanyId] =
-    useState("");
-  const [selectedProductId, setSelectedProductId] =
-    useState("");
+  const [
+    selectedCompanyId,
+    setSelectedCompanyId,
+  ] = useState("");
+
+  const [
+    selectedProductId,
+    setSelectedProductId,
+  ] = useState("");
+
   const [products, setProducts] =
     useState<Product[]>([]);
+
+  const [suppliers, setSuppliers] =
+    useState<Supplier[]>([]);
+
   const [batches, setBatches] =
     useState<Batch[]>([]);
+
   const [form, setForm] =
     useState<BatchForm>(initialForm);
-  const [loadingProducts, setLoadingProducts] =
-    useState(false);
-  const [loadingBatches, setLoadingBatches] =
-    useState(false);
+
+  const [
+    loadingProducts,
+    setLoadingProducts,
+  ] = useState(false);
+
+  const [
+    loadingSuppliers,
+    setLoadingSuppliers,
+  ] = useState(false);
+
+  const [
+    loadingBatches,
+    setLoadingBatches,
+  ] = useState(false);
+
   const [submitting, setSubmitting] =
     useState(false);
+
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<
-    "success" | "error"
-  >("success");
+
+  const [messageType, setMessageType] =
+    useState<"success" | "error">("success");
 
   useEffect(() => {
     if (companies.length === 0) {
       setSelectedCompanyId("");
+      setSelectedProductId("");
       setProducts([]);
+      setSuppliers([]);
       setBatches([]);
       return;
     }
@@ -131,41 +183,108 @@ function BatchPanel({
     }
   }, [companies, selectedCompanyId]);
 
-  const loadProducts = useCallback(async () => {
-    if (!selectedCompanyId) {
-      setProducts([]);
-      return;
-    }
-
-    setLoadingProducts(true);
-
-    try {
-      const response = await fetch(
-        `/api/companies/${selectedCompanyId}/products`,
-      );
-
-      if (!response.ok) {
-        throw new Error();
+  const loadProducts = useCallback(
+    async () => {
+      if (!selectedCompanyId) {
+        setProducts([]);
+        return;
       }
 
-      const data: Product[] =
-        await response.json();
+      setLoadingProducts(true);
 
-      setProducts(data);
-    } catch {
-      setMessageType("error");
-      setMessage(
-        "Não foi possível carregar os produtos.",
-      );
-      setProducts([]);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }, [selectedCompanyId]);
+      try {
+        const response = await fetch(
+          `/api/companies/${selectedCompanyId}/products`,
+        );
+
+        if (!response.ok) {
+          throw new Error();
+        }
+
+        const data: Product[] =
+          await response.json();
+
+        setProducts(data);
+      } catch {
+        setMessageType("error");
+        setMessage(
+          "Não foi possível carregar os produtos.",
+        );
+        setProducts([]);
+      } finally {
+        setLoadingProducts(false);
+      }
+    },
+    [selectedCompanyId],
+  );
+
+  const loadSuppliers = useCallback(
+    async () => {
+      if (!selectedCompanyId) {
+        setSuppliers([]);
+        return;
+      }
+
+      setLoadingSuppliers(true);
+
+      try {
+        const response = await fetch(
+          `/api/companies/${selectedCompanyId}/suppliers`,
+        );
+
+        if (!response.ok) {
+          throw new Error();
+        }
+
+        const data: Supplier[] =
+          await response.json();
+
+        const activeSuppliers = data.filter(
+          (supplier) =>
+            supplier.status === "ACTIVE",
+        );
+
+        setSuppliers(activeSuppliers);
+      } catch {
+        setMessageType("error");
+        setMessage(
+          "Não foi possível carregar os fornecedores.",
+        );
+        setSuppliers([]);
+      } finally {
+        setLoadingSuppliers(false);
+      }
+    },
+    [selectedCompanyId],
+  );
 
   useEffect(() => {
     void loadProducts();
-  }, [loadProducts]);
+    void loadSuppliers();
+  }, [loadProducts, loadSuppliers]);
+
+  useEffect(() => {
+    setForm((currentForm) => {
+      const selectedSupplierExists =
+        suppliers.some(
+          (supplier) =>
+            supplier.id ===
+            currentForm.supplierId,
+        );
+
+      if (selectedSupplierExists) {
+        return currentForm;
+      }
+
+      return {
+        ...currentForm,
+        supplierId:
+          suppliers.length > 0
+            ? suppliers[0].id
+            : "",
+      };
+    });
+  }, [suppliers]);
 
   useEffect(() => {
     if (products.length === 0) {
@@ -184,44 +303,47 @@ function BatchPanel({
     }
   }, [products, selectedProductId]);
 
-  const loadBatches = useCallback(async () => {
-    if (
-      !selectedCompanyId ||
-      !selectedProductId
-    ) {
-      setBatches([]);
-      return;
-    }
-
-    setLoadingBatches(true);
-    setMessage("");
-
-    try {
-      const response = await fetch(
-        `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`,
-      );
-
-      if (!response.ok) {
-        throw new Error();
+  const loadBatches = useCallback(
+    async () => {
+      if (
+        !selectedCompanyId ||
+        !selectedProductId
+      ) {
+        setBatches([]);
+        return;
       }
 
-      const data: Batch[] =
-        await response.json();
+      setLoadingBatches(true);
+      setMessage("");
 
-      setBatches(data);
-    } catch {
-      setMessageType("error");
-      setMessage(
-        "Não foi possível carregar os lotes.",
-      );
-      setBatches([]);
-    } finally {
-      setLoadingBatches(false);
-    }
-  }, [
-    selectedCompanyId,
-    selectedProductId,
-  ]);
+      try {
+        const response = await fetch(
+          `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`,
+        );
+
+        if (!response.ok) {
+          throw new Error();
+        }
+
+        const data: Batch[] =
+          await response.json();
+
+        setBatches(data);
+      } catch {
+        setMessageType("error");
+        setMessage(
+          "Não foi possível carregar os lotes.",
+        );
+        setBatches([]);
+      } finally {
+        setLoadingBatches(false);
+      }
+    },
+    [
+      selectedCompanyId,
+      selectedProductId,
+    ],
+  );
 
   useEffect(() => {
     void loadBatches();
@@ -243,6 +365,14 @@ function BatchPanel({
       return;
     }
 
+    if (!form.supplierId) {
+      setMessageType("error");
+      setMessage(
+        "Selecione o fornecedor de origem.",
+      );
+      return;
+    }
+
     setSubmitting(true);
     setMessage("");
 
@@ -256,6 +386,7 @@ function BatchPanel({
           },
           body: JSON.stringify({
             batchCode: form.batchCode,
+            supplierId: form.supplierId,
             manufactureDate:
               form.manufactureDate,
             expirationDate:
@@ -283,10 +414,15 @@ function BatchPanel({
         ...currentBatches,
       ]);
 
-      setForm(initialForm);
+      setForm((currentForm) => ({
+        ...initialForm,
+        supplierId:
+          currentForm.supplierId,
+      }));
+
       setMessageType("success");
       setMessage(
-        "Lote cadastrado com sucesso.",
+        "Lote cadastrado e fornecedor vinculado com sucesso.",
       );
     } catch (error) {
       setMessageType("error");
@@ -333,30 +469,63 @@ function BatchPanel({
     );
   }
 
+  function formatSupplierDetails(
+    batch: Batch,
+  ) {
+    if (!batch.supplierId) {
+      return "Fornecedor ainda não informado";
+    }
+
+    const location = [
+      batch.supplierCity,
+      batch.supplierState,
+      batch.supplierCountry,
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    return [
+      batch.supplierTaxId,
+      location,
+    ]
+      .filter(Boolean)
+      .join(" • ");
+  }
+
   return (
     <section className="batch-module">
       <div className="batch-module__heading">
         <div>
           <p>CONTROLE DE LOTES</p>
+
           <h2>Lotes rastreados</h2>
+
           <span>
-            Acompanhe fabricação, validade e
-            quantidade disponível.
+            Acompanhe fabricação, validade,
+            fornecedor e quantidade disponível.
           </span>
         </div>
 
         <div className="batch-filters">
           <label>
             Empresa
+
             <select
               value={selectedCompanyId}
               onChange={(event) => {
                 setSelectedCompanyId(
                   event.target.value,
                 );
+
                 setSelectedProductId("");
                 setProducts([]);
+                setSuppliers([]);
                 setBatches([]);
+
+                setForm({
+                  ...initialForm,
+                  supplierId: "",
+                });
               }}
             >
               {companies.length === 0 && (
@@ -378,6 +547,7 @@ function BatchPanel({
 
           <label>
             Produto
+
             <select
               value={selectedProductId}
               onChange={(event) =>
@@ -421,6 +591,7 @@ function BatchPanel({
           <form onSubmit={handleSubmit}>
             <label>
               Código do lote
+
               <input
                 type="text"
                 value={form.batchCode}
@@ -437,7 +608,65 @@ function BatchPanel({
             </label>
 
             <label>
+              Fornecedor de origem
+
+              <select
+                className="batch-supplier-select"
+                value={form.supplierId}
+                onChange={(event) =>
+                  updateForm(
+                    "supplierId",
+                    event.target.value,
+                  )
+                }
+                disabled={
+                  loadingSuppliers ||
+                  suppliers.length === 0
+                }
+                required
+              >
+                {loadingSuppliers && (
+                  <option value="">
+                    Carregando fornecedores...
+                  </option>
+                )}
+
+                {!loadingSuppliers &&
+                  suppliers.length === 0 && (
+                    <option value="">
+                      Cadastre um fornecedor
+                    </option>
+                  )}
+
+                {!loadingSuppliers &&
+                  suppliers.length > 0 && (
+                    <option value="">
+                      Selecione o fornecedor
+                    </option>
+                  )}
+
+                {suppliers.map((supplier) => (
+                  <option
+                    value={supplier.id}
+                    key={supplier.id}
+                  >
+                    {supplier.tradeName}
+                    {supplier.city
+                      ? ` — ${supplier.city}`
+                      : ""}
+                  </option>
+                ))}
+              </select>
+
+              <small className="batch-supplier-help">
+                Define a procedência empresarial
+                deste lote.
+              </small>
+            </label>
+
+            <label>
               Data de fabricação
+
               <input
                 type="date"
                 value={form.manufactureDate}
@@ -454,6 +683,7 @@ function BatchPanel({
 
             <label>
               Data de validade
+
               <input
                 type="date"
                 value={form.expirationDate}
@@ -469,6 +699,7 @@ function BatchPanel({
 
             <label>
               Quantidade inicial
+
               <input
                 type="number"
                 value={form.initialQuantity}
@@ -490,7 +721,8 @@ function BatchPanel({
               type="submit"
               disabled={
                 submitting ||
-                !selectedProductId
+                !selectedProductId ||
+                !form.supplierId
               }
             >
               {submitting
@@ -538,6 +770,11 @@ function BatchPanel({
                 const percentage =
                   calculatePercentage(batch);
 
+                const supplierInitial =
+                  batch.supplierName
+                    ?.charAt(0)
+                    .toUpperCase() ?? "?";
+
                 return (
                   <article
                     className="batch-item"
@@ -548,6 +785,7 @@ function BatchPanel({
                         <span>
                           {batch.productSku}
                         </span>
+
                         <h4>{batch.batchCode}</h4>
                       </div>
 
@@ -565,6 +803,7 @@ function BatchPanel({
                         <span>
                           Quantidade disponível
                         </span>
+
                         <strong>
                           {batch.currentQuantity}{" "}
                           {
@@ -589,6 +828,7 @@ function BatchPanel({
                     <div className="batch-dates">
                       <span>
                         Fabricação
+
                         <strong>
                           {formatDate(
                             batch.manufactureDate,
@@ -598,6 +838,7 @@ function BatchPanel({
 
                       <span>
                         Validade
+
                         <strong>
                           {formatDate(
                             batch.expirationDate,
@@ -607,9 +848,45 @@ function BatchPanel({
 
                       <span>
                         Quantidade inicial
+
                         <strong>
                           {batch.initialQuantity}
                         </strong>
+                      </span>
+                    </div>
+
+                    <div
+                      className={`batch-origin-card ${
+                        batch.supplierId
+                          ? ""
+                          : "batch-origin-card--missing"
+                      }`}
+                    >
+                      <div className="batch-origin-card__symbol">
+                        {supplierInitial}
+                      </div>
+
+                      <div className="batch-origin-card__content">
+                        <span>
+                          FORNECEDOR DE ORIGEM
+                        </span>
+
+                        <strong>
+                          {batch.supplierName ??
+                            "Origem não informada"}
+                        </strong>
+
+                        <small>
+                          {formatSupplierDetails(
+                            batch,
+                          )}
+                        </small>
+                      </div>
+
+                      <span className="batch-origin-card__status">
+                        {batch.supplierId
+                          ? "Procedência vinculada"
+                          : "Origem pendente"}
                       </span>
                     </div>
 
@@ -618,6 +895,7 @@ function BatchPanel({
                         <span>
                           PASSAPORTE DIGITAL
                         </span>
+
                         <small>
                           Consulta pública, mapa e
                           QR Code
@@ -632,6 +910,7 @@ function BatchPanel({
                         aria-label={`Abrir passaporte público do lote ${batch.batchCode}`}
                       >
                         Ver passaporte
+
                         <span aria-hidden="true">
                           ↗
                         </span>
