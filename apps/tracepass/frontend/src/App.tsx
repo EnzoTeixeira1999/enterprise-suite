@@ -10,6 +10,7 @@ import BatchPanel from "./components/BatchPanel";
 import MovementTimeline from "./components/MovementTimeline";
 import PublicPassport from "./components/PublicPassport";
 import SupplierPanel from "./components/SupplierPanel";
+import IncidentPanel from "./components/IncidentPanel";
 
 type ApiStatus = "checking" | "online" | "offline";
 type View = "landing" | "dashboard";
@@ -438,6 +439,7 @@ function App() {
           <SupplierPanel companies={companies} />
           <BatchPanel companies={companies} />
           <MovementTimeline companies={companies} />
+          <IncidentPanel companies={companies} />
         </section>
       )}
     </main>
