@@ -2,9 +2,12 @@ package dev.enzoteixeira.tracepass.passport;
 
 import dev.enzoteixeira.tracepass.batch.BatchService;
 import dev.enzoteixeira.tracepass.batch.dto.BatchResponse;
+import dev.enzoteixeira.tracepass.incident.IncidentService;
 import dev.enzoteixeira.tracepass.movement.MovementService;
 import dev.enzoteixeira.tracepass.movement.dto.MovementResponse;
 import dev.enzoteixeira.tracepass.passport.dto.PassportResponse;
+import dev.enzoteixeira.tracepass.passport.dto.PassportSafetyResponse;
+import dev.enzoteixeira.tracepass.passport.dto.PublicIncidentResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,30 +20,59 @@ import java.util.UUID;
 public class PassportService {
 
     private final BatchService batchService;
+
     private final MovementService movementService;
+
+    private final IncidentService incidentService;
 
     public PassportService(
             BatchService batchService,
-            MovementService movementService
+            MovementService movementService,
+            IncidentService incidentService
     ) {
         this.batchService = batchService;
-        this.movementService = movementService;
+
+        this.movementService =
+                movementService;
+
+        this.incidentService =
+                incidentService;
     }
 
     @Transactional(readOnly = true)
-    public PassportResponse findByBatchId(UUID batchId) {
+    public PassportResponse findByBatchId(
+            UUID batchId
+    ) {
         BatchResponse batch =
-                batchService.findPublicById(batchId);
+                batchService.findPublicById(
+                        batchId
+                );
 
         List<MovementResponse> movements =
-                movementService.findAllPublic(batchId);
+                movementService.findAllPublic(
+                        batchId
+                );
+
+        List<PublicIncidentResponse> incidents =
+                incidentService.findAllPublic(
+                        batchId
+                );
+
+        PassportSafetyResponse safety =
+                PassportSafetyResponse.from(
+                        batch.status(),
+                        incidents
+                );
 
         return new PassportResponse(
                 batch.id(),
                 "VERIFIED",
                 batch,
                 movements,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                safety,
+                OffsetDateTime.now(
+                        ZoneOffset.UTC
+                )
         );
     }
 }

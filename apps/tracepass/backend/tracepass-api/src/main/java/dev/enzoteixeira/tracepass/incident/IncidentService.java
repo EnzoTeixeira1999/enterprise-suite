@@ -13,6 +13,8 @@ import dev.enzoteixeira.tracepass.movement.dto.CreateMovementRequest;
 import dev.enzoteixeira.tracepass.movement.dto.MovementResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import dev.enzoteixeira.tracepass.passport.dto.PublicIncidentResponse;
+
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -126,6 +128,25 @@ public class IncidentService {
                 )
                 .stream()
                 .map(IncidentResponse::from)
+                .toList();
+    }
+
+        @Transactional(readOnly = true)
+    public List<PublicIncidentResponse> findAllPublic(
+            UUID batchId
+    ) {
+        if (!batchRepository.existsById(batchId)) {
+            throw new NoSuchElementException(
+                    "Passaporte do lote não encontrado"
+            );
+        }
+
+        return incidentRepository
+                .findAllByBatchIdOrderByOccurredAtDesc(
+                        batchId
+                )
+                .stream()
+                .map(PublicIncidentResponse::from)
                 .toList();
     }
 
