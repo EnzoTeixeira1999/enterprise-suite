@@ -4,6 +4,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import BatchReleaseCard from "./BatchReleaseCard";
 
 type CompanyOption = {
   id: string;
@@ -730,7 +731,12 @@ function IncidentPanel({
     (batch) =>
       batch.id === selectedBatchId,
   );
-
+  const unresolvedBatchIncidents =
+    incidents.filter(
+      (incident) =>
+        incident.status !== "RESOLVED",
+    ).length;
+    
   return (
     <section className="incident-module">
       <div className="incident-module__heading">
@@ -1347,6 +1353,37 @@ function IncidentPanel({
           )}
         </article>
       </div>
+      
+            {selectedBatch && (
+        <BatchReleaseCard
+          companyId={selectedCompanyId}
+          productId={selectedProductId}
+          batchId={selectedBatch.id}
+          batchCode={selectedBatch.batchCode}
+          batchStatus={selectedBatch.status}
+          unresolvedIncidents={
+            unresolvedBatchIncidents
+          }
+          onReleased={() => {
+            setBatches((currentBatches) =>
+              currentBatches.map((batch) =>
+                batch.id ===
+                selectedBatch.id
+                  ? {
+                      ...batch,
+                      status: "IN_STORAGE",
+                    }
+                  : batch,
+              ),
+            );
+
+            setMessageType("success");
+            setMessage(
+              "Lote liberado e movimentação registrada.",
+            );
+          }}
+        />
+      )}
     </section>
   );
 }
