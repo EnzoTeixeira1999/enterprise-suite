@@ -6,6 +6,7 @@ import {
 } from "react";
 import JourneyMap from "./JourneyMap";
 import LocationPicker from "./LocationPicker";
+import { apiFetch } from "../services/api";
 
 type CompanyOption = {
   id: string;
@@ -148,7 +149,7 @@ function MovementTimeline({
     }
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products`,
       );
 
@@ -192,7 +193,7 @@ function MovementTimeline({
     }
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`,
       );
 
@@ -243,7 +244,7 @@ function MovementTimeline({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches/${selectedBatchId}/movements`,
       );
 
@@ -289,7 +290,7 @@ function MovementTimeline({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches/${selectedBatchId}/movements`,
         {
           method: "POST",

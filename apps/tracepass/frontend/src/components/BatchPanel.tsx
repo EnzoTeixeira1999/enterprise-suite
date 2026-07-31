@@ -4,6 +4,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { apiFetch } from "../services/api";
 
 type CompanyOption = {
   id: string;
@@ -193,7 +194,7 @@ function BatchPanel({
       setLoadingProducts(true);
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/products`,
         );
 
@@ -228,7 +229,7 @@ function BatchPanel({
       setLoadingSuppliers(true);
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/suppliers`,
         );
 
@@ -317,7 +318,7 @@ function BatchPanel({
       setMessage("");
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`,
         );
 
@@ -377,7 +378,7 @@ function BatchPanel({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`,
         {
           method: "POST",

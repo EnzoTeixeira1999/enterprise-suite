@@ -11,6 +11,7 @@ import MovementTimeline from "./components/MovementTimeline";
 import PublicPassport from "./components/PublicPassport";
 import SupplierPanel from "./components/SupplierPanel";
 import IncidentPanel from "./components/IncidentPanel";
+import { apiFetch } from "./services/api";
 
 type ApiStatus = "checking" | "online" | "offline";
 type View = "landing" | "dashboard";
@@ -68,7 +69,7 @@ function App() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   useEffect(() => {
-    fetch("/actuator/health")
+    apiFetch("/actuator/health")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Falha ao consultar a API");
@@ -89,7 +90,7 @@ function App() {
     setCompaniesError("");
 
     try {
-      const response = await fetch("/api/companies");
+      const response = await apiFetch("/api/companies");
 
       if (!response.ok) {
         throw new Error("Não foi possível carregar as empresas");
@@ -120,7 +121,7 @@ function App() {
     setFeedback(null);
 
     try {
-      const response = await fetch("/api/companies", {
+      const response = await apiFetch("/api/companies", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

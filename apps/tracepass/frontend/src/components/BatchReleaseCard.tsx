@@ -3,6 +3,7 @@ import {
   type FormEvent,
 } from "react";
 import LocationPicker from "./LocationPicker";
+import { apiFetch } from "../services/api";
 
 type BatchStatus =
   | "REGISTERED"
@@ -78,7 +79,7 @@ function BatchReleaseCard({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${companyId}/products/${productId}/batches/${batchId}/release`,
         {
           method: "POST",

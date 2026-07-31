@@ -4,6 +4,7 @@ import PassportQrCode from "./PassportQrCode";
 import PassportSafetyPanel, {
   type PassportSafety,
 } from "./PassportSafetyPanel";
+import { apiFetch } from "../services/api";
 
 type BatchStatus =
   | "REGISTERED"
@@ -171,7 +172,7 @@ function PublicPassport({
       setError("");
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/public/passports/${passportId}`,
         );
 

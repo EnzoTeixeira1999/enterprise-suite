@@ -5,6 +5,7 @@ import {
   type FormEvent,
 } from "react";
 import BatchReleaseCard from "./BatchReleaseCard";
+import { apiFetch } from "../services/api";
 
 type CompanyOption = {
   id: string;
@@ -269,7 +270,7 @@ function IncidentPanel({
       setLoadingProducts(true);
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/products`,
         );
 
@@ -302,7 +303,7 @@ function IncidentPanel({
       }
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/incidents`,
         );
 
@@ -362,7 +363,7 @@ function IncidentPanel({
       setLoadingBatches(true);
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`,
         );
 
@@ -427,7 +428,7 @@ function IncidentPanel({
       setLoadingIncidents(true);
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches/${selectedBatchId}/incidents`,
         );
 
@@ -513,7 +514,7 @@ function IncidentPanel({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches/${selectedBatchId}/incidents`,
         {
           method: "POST",
@@ -594,7 +595,7 @@ function IncidentPanel({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches/${selectedBatchId}/incidents/${incidentId}/investigation`,
         {
           method: "PATCH",
@@ -647,7 +648,7 @@ function IncidentPanel({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches/${selectedBatchId}/incidents/${incidentId}/resolve`,
         {
           method: "PATCH",

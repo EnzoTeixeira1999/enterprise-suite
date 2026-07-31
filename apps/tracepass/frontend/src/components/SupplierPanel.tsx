@@ -4,6 +4,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { apiFetch } from "../services/api";
 
 type CompanyOption = {
   id: string;
@@ -115,7 +116,7 @@ function SupplierPanel({
       setMessage("");
 
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/companies/${selectedCompanyId}/suppliers`,
         );
 
@@ -161,7 +162,7 @@ function SupplierPanel({
     setMessage("");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/companies/${selectedCompanyId}/suppliers`,
         {
           method: "POST",
