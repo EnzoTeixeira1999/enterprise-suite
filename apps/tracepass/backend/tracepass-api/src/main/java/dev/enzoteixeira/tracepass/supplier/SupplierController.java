@@ -3,6 +3,8 @@ package dev.enzoteixeira.tracepass.supplier;
 import dev.enzoteixeira.tracepass.supplier.dto.CreateSupplierRequest;
 import dev.enzoteixeira.tracepass.supplier.dto.SupplierResponse;
 import dev.enzoteixeira.tracepass.supplier.dto.UpdateSupplierRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +24,10 @@ import java.util.UUID;
 @RequestMapping(
         "/api/companies/{companyId}/suppliers"
 )
+@Tag(
+        name = "Fornecedores",
+        description = "Cadastro e gerenciamento dos fornecedores responsáveis pela origem dos lotes"
+)
 public class SupplierController {
 
     private final SupplierService supplierService;
@@ -34,6 +40,10 @@ public class SupplierController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            summary = "Cadastrar fornecedor",
+            description = "Cadastra um novo fornecedor vinculado à empresa"
+    )
     public SupplierResponse create(
             @PathVariable UUID companyId,
             @Valid
@@ -47,6 +57,10 @@ public class SupplierController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Listar fornecedores",
+            description = "Retorna todos os fornecedores cadastrados na empresa"
+    )
     public List<SupplierResponse> findAll(
             @PathVariable UUID companyId
     ) {
@@ -54,6 +68,10 @@ public class SupplierController {
     }
 
     @GetMapping("/{supplierId}")
+    @Operation(
+            summary = "Consultar fornecedor",
+            description = "Consulta um fornecedor pelo seu identificador"
+    )
     public SupplierResponse findById(
             @PathVariable UUID companyId,
             @PathVariable UUID supplierId
@@ -65,6 +83,10 @@ public class SupplierController {
     }
 
     @PutMapping("/{supplierId}")
+    @Operation(
+            summary = "Atualizar fornecedor",
+            description = "Atualiza os dados e o status de um fornecedor existente"
+    )
     public SupplierResponse update(
             @PathVariable UUID companyId,
             @PathVariable UUID supplierId,
@@ -81,6 +103,10 @@ public class SupplierController {
 
     @DeleteMapping("/{supplierId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(
+            summary = "Excluir fornecedor",
+            description = "Exclui um fornecedor cadastrado na empresa"
+    )
     public void delete(
             @PathVariable UUID companyId,
             @PathVariable UUID supplierId

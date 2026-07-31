@@ -5,6 +5,8 @@ import dev.enzoteixeira.tracepass.incident.dto.IncidentResponse;
 import dev.enzoteixeira.tracepass.incident.dto.ReleaseBatchRequest;
 import dev.enzoteixeira.tracepass.incident.dto.ResolveIncidentRequest;
 import dev.enzoteixeira.tracepass.movement.dto.MovementResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/companies/{companyId}")
+@Tag(
+        name = "Ocorrências e Segurança",
+        description = "Gestão de desvios, bloqueios automáticos, investigações e liberações controladas dos lotes"
+)
 public class IncidentController {
 
     private final IncidentService incidentService;
@@ -32,6 +38,10 @@ public class IncidentController {
     }
 
     @GetMapping("/incidents")
+    @Operation(
+            summary = "Listar ocorrências da empresa",
+            description = "Retorna todas as ocorrências de rastreabilidade registradas na empresa"
+    )
     public List<IncidentResponse> findAllByCompany(
             @PathVariable UUID companyId
     ) {
@@ -42,6 +52,10 @@ public class IncidentController {
 
     @GetMapping(
             "/products/{productId}/batches/{batchId}/incidents"
+    )
+    @Operation(
+            summary = "Consultar ocorrências do lote",
+            description = "Retorna o histórico de ocorrências registradas em um lote"
     )
     public List<IncidentResponse> findAllByBatch(
             @PathVariable UUID companyId,
@@ -59,6 +73,10 @@ public class IncidentController {
             "/products/{productId}/batches/{batchId}/incidents"
     )
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            summary = "Registrar ocorrência",
+            description = "Registra um desvio de rastreabilidade e pode bloquear automaticamente o lote de acordo com a gravidade"
+    )
     public IncidentResponse create(
             @PathVariable UUID companyId,
             @PathVariable UUID productId,
@@ -78,6 +96,10 @@ public class IncidentController {
     @PatchMapping(
             "/products/{productId}/batches/{batchId}/incidents/{incidentId}/investigation"
     )
+    @Operation(
+            summary = "Iniciar investigação",
+            description = "Altera uma ocorrência aberta para o estado de investigação"
+    )
     public IncidentResponse startInvestigation(
             @PathVariable UUID companyId,
             @PathVariable UUID productId,
@@ -94,6 +116,10 @@ public class IncidentController {
 
     @PatchMapping(
             "/products/{productId}/batches/{batchId}/incidents/{incidentId}/resolve"
+    )
+    @Operation(
+            summary = "Resolver ocorrência",
+            description = "Finaliza uma ocorrência e registra as ações executadas durante o tratamento"
     )
     public IncidentResponse resolve(
             @PathVariable UUID companyId,
@@ -116,6 +142,10 @@ public class IncidentController {
     @PostMapping(
             "/products/{productId}/batches/{batchId}/release"
     )
+    @Operation(
+            summary = "Autorizar liberação do lote",
+            description = "Autoriza o retorno do lote à operação depois que todas as ocorrências forem resolvidas"
+    )
     public MovementResponse releaseBatch(
             @PathVariable UUID companyId,
             @PathVariable UUID productId,
@@ -134,6 +164,10 @@ public class IncidentController {
 
     @GetMapping(
             "/products/{productId}/batches/{batchId}/incidents/open-count"
+    )
+    @Operation(
+            summary = "Contar ocorrências pendentes",
+            description = "Retorna a quantidade de ocorrências abertas ou em investigação no lote"
     )
     public long countOpenByBatch(
             @PathVariable UUID companyId,
