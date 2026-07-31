@@ -5,6 +5,8 @@ import dev.enzoteixeira.tracepass.batch.dto.CreateBatchRequest;
 import dev.enzoteixeira.tracepass.batch.dto.UpdateBatchRequest;
 import dev.enzoteixeira.tracepass.product.Product;
 import dev.enzoteixeira.tracepass.product.ProductRepository;
+import dev.enzoteixeira.tracepass.supplier.Supplier;
+import dev.enzoteixeira.tracepass.supplier.SupplierService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +22,16 @@ public class BatchService {
 
     private final BatchRepository batchRepository;
     private final ProductRepository productRepository;
+    private final SupplierService supplierService;
 
     public BatchService(
             BatchRepository batchRepository,
-            ProductRepository productRepository
+            ProductRepository productRepository,
+            SupplierService supplierService
     ) {
         this.batchRepository = batchRepository;
         this.productRepository = productRepository;
+        this.supplierService = supplierService;
     }
 
     @Transactional
@@ -35,8 +40,18 @@ public class BatchService {
             UUID productId,
             CreateBatchRequest request
     ) {
-        Product product = findProduct(companyId, productId);
-        String batchCode = normalizeBatchCode(request.batchCode());
+        Product product = findProduct(
+                companyId,
+                productId
+        );
+
+        Supplier supplier = findSupplier(
+                companyId,
+                request.supplierId()
+        );
+
+        String batchCode =
+                normalizeBatchCode(request.batchCode());
 
         validateDates(
                 request.manufactureDate(),
@@ -61,7 +76,10 @@ public class BatchService {
                 request.initialQuantity()
         );
 
-        Batch savedBatch = batchRepository.save(batch);
+        batch.changeSupplier(supplier);
+
+        Batch savedBatch =
+                batchRepository.save(batch);
 
         return BatchResponse.from(savedBatch);
     }
@@ -74,7 +92,9 @@ public class BatchService {
         findProduct(companyId, productId);
 
         return batchRepository
-                .findAllByProduct_IdOrderByCreatedAtDesc(productId)
+                .findAllByProduct_IdOrderByCreatedAtDesc(
+                        productId
+                )
                 .stream()
                 .map(BatchResponse::from)
                 .toList();
@@ -94,12 +114,16 @@ public class BatchService {
     }
 
     @Transactional(readOnly = true)
-    public BatchResponse findPublicById(UUID batchId) {
+    public BatchResponse findPublicById(
+            UUID batchId
+    ) {
         Batch batch = batchRepository
                 .findById(batchId)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Passaporte do lote não encontrado"
-                ));
+                .orElseThrow(() ->
+                        new NoSuchElementException(
+                                "Passaporte do lote não encontrado"
+                        )
+                );
 
         return BatchResponse.from(batch);
     }
@@ -112,8 +136,17 @@ public class BatchService {
             UpdateBatchRequest request
     ) {
         findProduct(companyId, productId);
-        Batch batch = findBatch(productId, batchId);
-        String batchCode = normalizeBatchCode(request.batchCode());
+
+        Batch batch =
+                findBatch(productId, batchId);
+
+        Supplier supplier = findSupplier(
+                companyId,
+                request.supplierId()
+        );
+
+        String batchCode =
+                normalizeBatchCode(request.batchCode());
 
         validateDates(
                 request.manufactureDate(),
@@ -144,6 +177,8 @@ public class BatchService {
                 request.status()
         );
 
+        batch.changeSupplier(supplier);
+
         Batch updatedBatch =
                 batchRepository.saveAndFlush(batch);
 
@@ -157,7 +192,10 @@ public class BatchService {
             UUID batchId
     ) {
         findProduct(companyId, productId);
-        Batch batch = findBatch(productId, batchId);
+
+        Batch batch =
+                findBatch(productId, batchId);
+
         batchRepository.delete(batch);
     }
 
@@ -166,10 +204,15 @@ public class BatchService {
             UUID productId
     ) {
         return productRepository
-                .findByIdAndCompany_Id(productId, companyId)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Produto não encontrado para esta empresa"
-                ));
+                .findByIdAndCompany_Id(
+                        productId,
+                        companyId
+                )
+                .orElseThrow(() ->
+                        new NoSuchElementException(
+                                "Produto não encontrado para esta empresa"
+                        )
+                );
     }
 
     private Batch findBatch(
@@ -177,10 +220,29 @@ public class BatchService {
             UUID batchId
     ) {
         return batchRepository
-                .findByIdAndProduct_Id(batchId, productId)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Lote não encontrado para este produto"
-                ));
+                .findByIdAndProduct_Id(
+                        batchId,
+                        productId
+                )
+                .orElseThrow(() ->
+                        new NoSuchElementException(
+                                "Lote não encontrado para este produto"
+                        )
+                );
+    }
+
+    private Supplier findSupplier(
+            UUID companyId,
+            UUID supplierId
+    ) {
+        if (supplierId == null) {
+            return null;
+        }
+
+        return supplierService.findEntity(
+                companyId,
+                supplierId
+        );
     }
 
     private void validateDates(
@@ -189,7 +251,9 @@ public class BatchService {
     ) {
         if (
                 expirationDate != null
-                        && expirationDate.isBefore(manufactureDate)
+                        && expirationDate.isBefore(
+                                manufactureDate
+                        )
         ) {
             throw new IllegalArgumentException(
                     "A validade não pode ser anterior à fabricação"
@@ -201,14 +265,20 @@ public class BatchService {
             BigDecimal initialQuantity,
             BigDecimal currentQuantity
     ) {
-        if (currentQuantity.compareTo(initialQuantity) > 0) {
+        if (
+                currentQuantity.compareTo(
+                        initialQuantity
+                ) > 0
+        ) {
             throw new IllegalArgumentException(
                     "A quantidade atual não pode superar a quantidade inicial"
             );
         }
     }
 
-    private String normalizeBatchCode(String batchCode) {
+    private String normalizeBatchCode(
+            String batchCode
+    ) {
         return batchCode
                 .trim()
                 .toUpperCase(Locale.ROOT);
