@@ -5,10 +5,17 @@ import dev.enzoteixeira.tracepass.batch.BatchRepository;
 import dev.enzoteixeira.tracepass.batch.BatchStatus;
 import dev.enzoteixeira.tracepass.incident.dto.CreateIncidentRequest;
 import dev.enzoteixeira.tracepass.incident.dto.IncidentResponse;
+import dev.enzoteixeira.tracepass.incident.dto.ReleaseBatchRequest;
 import dev.enzoteixeira.tracepass.incident.dto.ResolveIncidentRequest;
+import dev.enzoteixeira.tracepass.movement.MovementService;
+import dev.enzoteixeira.tracepass.movement.MovementType;
+import dev.enzoteixeira.tracepass.movement.dto.CreateMovementRequest;
+import dev.enzoteixeira.tracepass.movement.dto.MovementResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -21,15 +28,21 @@ public class IncidentService {
 
     private final BatchRepository batchRepository;
 
+    private final MovementService movementService;
+
     public IncidentService(
             TraceabilityIncidentRepository incidentRepository,
-            BatchRepository batchRepository
+            BatchRepository batchRepository,
+            MovementService movementService
     ) {
         this.incidentRepository =
                 incidentRepository;
 
         this.batchRepository =
                 batchRepository;
+
+        this.movementService =
+                movementService;
     }
 
     @Transactional
@@ -170,6 +183,66 @@ public class IncidentService {
 
         return IncidentResponse.from(
                 updatedIncident
+        );
+    }
+
+    @Transactional
+    public MovementResponse releaseBatch(
+            UUID companyId,
+            UUID productId,
+            UUID batchId,
+            ReleaseBatchRequest request
+    ) {
+        Batch batch = findBatch(
+                companyId,
+                productId,
+                batchId
+        );
+
+        if (
+                batch.getStatus()
+                        != BatchStatus.BLOCKED
+        ) {
+            throw new IllegalStateException(
+                    "Somente lotes bloqueados podem ser liberados"
+            );
+        }
+
+        long unresolvedIncidents =
+                incidentRepository
+                        .countByBatchIdAndStatusNot(
+                                batchId,
+                                IncidentStatus.RESOLVED
+                        );
+
+        if (unresolvedIncidents > 0) {
+            throw new IllegalStateException(
+                    "Todas as ocorrências precisam estar resolvidas antes da liberação"
+            );
+        }
+
+        CreateMovementRequest movementRequest =
+                new CreateMovementRequest(
+                        MovementType.RELEASE,
+                        "Lote liberado após inspeção",
+                        request.releaseNotes().trim(),
+                        normalizeOptional(
+                                request.locationName()
+                        ),
+                        request.latitude(),
+                        request.longitude(),
+                        request.releasedBy().trim(),
+                        batch.getCurrentQuantity(),
+                        OffsetDateTime.now(
+                                ZoneOffset.UTC
+                        )
+                );
+
+        return movementService.create(
+                companyId,
+                productId,
+                batchId,
+                movementRequest
         );
     }
 

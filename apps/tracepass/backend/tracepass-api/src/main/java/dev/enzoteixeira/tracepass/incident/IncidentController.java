@@ -2,7 +2,9 @@ package dev.enzoteixeira.tracepass.incident;
 
 import dev.enzoteixeira.tracepass.incident.dto.CreateIncidentRequest;
 import dev.enzoteixeira.tracepass.incident.dto.IncidentResponse;
+import dev.enzoteixeira.tracepass.incident.dto.ReleaseBatchRequest;
 import dev.enzoteixeira.tracepass.incident.dto.ResolveIncidentRequest;
+import dev.enzoteixeira.tracepass.movement.dto.MovementResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,6 +109,25 @@ public class IncidentController {
                 productId,
                 batchId,
                 incidentId,
+                request
+        );
+    }
+
+    @PostMapping(
+            "/products/{productId}/batches/{batchId}/release"
+    )
+    public MovementResponse releaseBatch(
+            @PathVariable UUID companyId,
+            @PathVariable UUID productId,
+            @PathVariable UUID batchId,
+            @Valid
+            @RequestBody
+            ReleaseBatchRequest request
+    ) {
+        return incidentService.releaseBatch(
+                companyId,
+                productId,
+                batchId,
                 request
         );
     }
