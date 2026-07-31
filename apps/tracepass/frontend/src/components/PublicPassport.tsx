@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import JourneyMap from "./JourneyMap";
 import PassportQrCode from "./PassportQrCode";
+import PassportSafetyPanel, {
+  type PassportSafety,
+} from "./PassportSafetyPanel";
 
 type BatchStatus =
   | "REGISTERED"
@@ -73,6 +76,7 @@ type PassportData = {
   verificationStatus: string;
   batch: PassportBatch;
   movements: PassportMovement[];
+  safety: PassportSafety;
   generatedAt: string;
 };
 
@@ -488,6 +492,11 @@ function PublicPassport({
           </div>
         )}
       </section>
+      
+      <PassportSafetyPanel
+        safety={passport.safety}
+        batchCode={batch.batchCode}
+      />
 
       <section className="passport-current-location">
         <div>

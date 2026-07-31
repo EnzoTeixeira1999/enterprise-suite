@@ -4854,3 +4854,567 @@
     padding: 18px;
   }
 }
+
+/* ==================================================
+   SEGURANÇA DO PASSAPORTE PÚBLICO
+   ================================================== */
+
+.passport-safety {
+  margin: 28px auto;
+  padding: clamp(30px, 5vw, 66px);
+  border: 1px solid
+    rgba(82, 235, 186, 0.2);
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(52, 224, 169, 0.1),
+      transparent 30%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(7, 35, 49, 0.97),
+      rgba(4, 24, 37, 0.99)
+    );
+  overflow: hidden;
+}
+
+.passport-safety--attention {
+  border-color:
+    rgba(255, 187, 80, 0.25);
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(255, 187, 80, 0.11),
+      transparent 30%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(45, 39, 24, 0.5),
+      rgba(4, 24, 37, 0.99)
+    );
+}
+
+.passport-safety--blocked {
+  border-color:
+    rgba(255, 101, 113, 0.27);
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(255, 80, 96, 0.12),
+      transparent 30%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(55, 27, 38, 0.55),
+      rgba(4, 24, 37, 0.99)
+    );
+}
+
+.passport-safety__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.passport-safety__heading
+  > div:first-child {
+  max-width: 760px;
+}
+
+.passport-safety__heading p {
+  margin: 0 0 16px;
+  color: #58e5b9;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.passport-safety--attention
+  .passport-safety__heading p {
+  color: #ffc15d;
+}
+
+.passport-safety--blocked
+  .passport-safety__heading p {
+  color: #ff707b;
+}
+
+.passport-safety__heading h2 {
+  margin: 0;
+  color: #eff8ff;
+  font-size: clamp(2.2rem, 5vw, 4.6rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.passport-safety__heading
+  > div:first-child
+  > span {
+  display: block;
+  max-width: 700px;
+  margin-top: 21px;
+  color: #80a9c1;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.passport-safety__state {
+  display: flex;
+  min-width: 285px;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid
+    rgba(82, 235, 186, 0.22);
+  border-radius: 18px;
+  background:
+    rgba(48, 218, 164, 0.07);
+}
+
+.passport-safety__state
+  > span {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  place-items: center;
+  border: 1px solid
+    rgba(82, 235, 186, 0.38);
+  border-radius: 15px;
+  color: #59eabe;
+  background:
+    rgba(48, 218, 164, 0.1);
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.passport-safety__state
+  > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.passport-safety__state small {
+  color: #58dcb2;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.passport-safety__state strong {
+  color: #dff8ef;
+  font-size: 0.85rem;
+}
+
+.passport-safety--attention
+  .passport-safety__state {
+  border-color:
+    rgba(255, 187, 80, 0.25);
+  background:
+    rgba(255, 187, 80, 0.07);
+}
+
+.passport-safety--attention
+  .passport-safety__state
+  > span {
+  border-color:
+    rgba(255, 187, 80, 0.35);
+  color: #ffc15d;
+  background:
+    rgba(255, 187, 80, 0.1);
+}
+
+.passport-safety--attention
+  .passport-safety__state small {
+  color: #ffc15d;
+}
+
+.passport-safety--blocked
+  .passport-safety__state {
+  border-color:
+    rgba(255, 101, 113, 0.27);
+  background:
+    rgba(255, 101, 113, 0.08);
+}
+
+.passport-safety--blocked
+  .passport-safety__state
+  > span {
+  border-color:
+    rgba(255, 101, 113, 0.38);
+  color: #ff7781;
+  background:
+    rgba(255, 101, 113, 0.11);
+}
+
+.passport-safety--blocked
+  .passport-safety__state small {
+  color: #ff7781;
+}
+
+.passport-safety__metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-top: 37px;
+}
+
+.passport-safety__metrics article {
+  min-height: 125px;
+  padding: 20px;
+  border: 1px solid
+    rgba(102, 192, 232, 0.12);
+  border-radius: 17px;
+  background:
+    rgba(4, 25, 39, 0.7);
+}
+
+.passport-safety__metrics
+  article
+  > span {
+  display: block;
+  color: #648da7;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.passport-safety__metrics
+  article
+  > strong {
+  display: block;
+  margin-top: 14px;
+  color: #5be2b7;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.passport-safety__metrics
+  article
+  > small {
+  display: block;
+  margin-top: 9px;
+  color: #4f768c;
+  font-size: 0.7rem;
+}
+
+.passport-safety--attention
+  .passport-safety__metrics
+  article
+  > strong {
+  color: #ffc15d;
+}
+
+.passport-safety--blocked
+  .passport-safety__metrics
+  article
+  > strong {
+  color: #ff737e;
+}
+
+.passport-safety__history {
+  margin-top: 23px;
+  padding: 24px;
+  border: 1px solid
+    rgba(102, 192, 232, 0.12);
+  border-radius: 20px;
+  background:
+    rgba(3, 21, 33, 0.66);
+}
+
+.passport-safety__history-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 19px;
+}
+
+.passport-safety__history-heading p {
+  margin: 0 0 7px;
+  color: #63dcff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.passport-safety__history-heading h3 {
+  margin: 0;
+  color: #eef7ff;
+  font-size: 1.3rem;
+}
+
+.passport-safety__history-heading
+  > span {
+  padding: 8px 11px;
+  border: 1px solid
+    rgba(255, 187, 80, 0.2);
+  border-radius: 999px;
+  color: #ffc15d;
+  background:
+    rgba(255, 187, 80, 0.07);
+  font-size: 0.66rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.passport-safety__list {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.passport-safety-incident {
+  padding: 19px;
+  border: 1px solid
+    rgba(102, 192, 232, 0.13);
+  border-radius: 16px;
+  background:
+    rgba(8, 33, 49, 0.82);
+}
+
+.passport-safety-incident--resolved {
+  border-color:
+    rgba(82, 235, 186, 0.15);
+}
+
+.passport-safety-incident__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.passport-safety-incident__top
+  > div:first-child
+  > span {
+  color: #68cce9;
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.passport-safety-incident h4 {
+  margin: 7px 0 0;
+  color: #eff8ff;
+  font-size: 1rem;
+}
+
+.passport-safety-incident__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.passport-safety-severity,
+.passport-safety-status {
+  padding: 6px 9px;
+  border: 1px solid
+    rgba(102, 192, 232, 0.14);
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.passport-safety-severity--low {
+  color: #57e0b5;
+}
+
+.passport-safety-severity--medium {
+  color: #ffc15d;
+}
+
+.passport-safety-severity--high,
+.passport-safety-severity--critical {
+  border-color:
+    rgba(255, 101, 113, 0.22);
+  color: #ff7882;
+  background:
+    rgba(255, 101, 113, 0.07);
+}
+
+.passport-safety-status--open {
+  color: #ff8992;
+}
+
+.passport-safety-status--investigating {
+  color: #64dafa;
+}
+
+.passport-safety-status--resolved {
+  color: #5ce4b8;
+}
+
+.passport-safety-incident__dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 17px;
+  padding-top: 15px;
+  border-top: 1px solid
+    rgba(102, 192, 232, 0.09);
+}
+
+.passport-safety-incident__dates
+  > span {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #4e768f;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.passport-safety-incident__dates
+  strong {
+  color: #afcada;
+  font-size: 0.69rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.passport-safety-incident__automation {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid
+    rgba(255, 187, 80, 0.16);
+  border-radius: 12px;
+  background:
+    rgba(255, 187, 80, 0.05);
+}
+
+.passport-safety-incident__automation
+  > span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 9px;
+  color: #ffc15d;
+  background:
+    rgba(255, 187, 80, 0.1);
+  font-weight: 900;
+}
+
+.passport-safety-incident__automation
+  > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.passport-safety-incident__automation
+  strong {
+  color: #e6b767;
+  font-size: 0.7rem;
+}
+
+.passport-safety-incident__automation
+  small {
+  color: #806e50;
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+
+.passport-safety__empty {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 18px;
+  border: 1px solid
+    rgba(82, 235, 186, 0.15);
+  border-radius: 14px;
+  background:
+    rgba(48, 218, 164, 0.05);
+}
+
+.passport-safety__empty
+  > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: 12px;
+  color: #5ce3b8;
+  background:
+    rgba(48, 218, 164, 0.1);
+  font-weight: 900;
+}
+
+.passport-safety__empty
+  > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.passport-safety__empty strong {
+  color: #ccece1;
+}
+
+.passport-safety__empty small {
+  color: #638b7d;
+}
+
+@media (max-width: 1000px) {
+  .passport-safety__heading {
+    flex-direction: column;
+  }
+
+  .passport-safety__state {
+    min-width: 0;
+  }
+
+  .passport-safety__metrics {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .passport-safety__list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .passport-safety {
+    padding: 25px 20px;
+    border-radius: 22px;
+  }
+
+  .passport-safety__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .passport-safety__history {
+    padding: 18px;
+  }
+
+  .passport-safety__history-heading,
+  .passport-safety-incident__top {
+    flex-direction: column;
+  }
+
+  .passport-safety-incident__badges {
+    justify-content: flex-start;
+  }
+
+  .passport-safety-incident__dates {
+    grid-template-columns: 1fr;
+  }
+}
