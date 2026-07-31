@@ -7,7 +7,8 @@ type BatchStatus =
   | "IN_STORAGE"
   | "IN_TRANSIT"
   | "BLOCKED"
-  | "COMPLETED";
+  | "COMPLETED"
+  | "EXPIRED";
 
 type MovementType =
   | "PRODUCTION"
@@ -29,6 +30,14 @@ type PassportBatch = {
   productName: string;
   productSku: string;
   productUnit: string;
+
+  supplierId: string | null;
+  supplierName: string | null;
+  supplierTaxId: string | null;
+  supplierCity: string | null;
+  supplierState: string | null;
+  supplierCountry: string | null;
+
   batchCode: string;
   manufactureDate: string;
   expirationDate: string | null;
@@ -71,15 +80,22 @@ type PublicPassportProps = {
   passportId: string;
 };
 
-const batchStatusLabels: Record<BatchStatus, string> = {
+const batchStatusLabels: Record<
+  BatchStatus,
+  string
+> = {
   REGISTERED: "Registrado",
   IN_STORAGE: "Armazenado",
   IN_TRANSIT: "Em trânsito",
   BLOCKED: "Bloqueado",
   COMPLETED: "Concluído",
+  EXPIRED: "Vencido",
 };
 
-const movementLabels: Record<MovementType, string> = {
+const movementLabels: Record<
+  MovementType,
+  string
+> = {
   PRODUCTION: "Produção",
   STORAGE: "Armazenamento",
   DISPATCH: "Expedição",
@@ -115,14 +131,35 @@ function formatQuantity(quantity: number) {
   }).format(quantity);
 }
 
+function getSupplierLocation(
+  batch: PassportBatch,
+) {
+  const location = [
+    batch.supplierCity,
+    batch.supplierState,
+    batch.supplierCountry,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  return (
+    location || "Localização não informada"
+  );
+}
+
 function PublicPassport({
   passportId,
 }: PublicPassportProps) {
   const [passport, setPassport] =
     useState<PassportData | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const [loading, setLoading] =
+    useState(true);
+
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
+
+  const [copied, setCopied] =
+    useState(false);
 
   useEffect(() => {
     async function loadPassport() {
@@ -181,8 +218,12 @@ function PublicPassport({
       <main className="public-passport public-passport--state">
         <div className="passport-state-card">
           <div className="passport-loading" />
+
           <h1>Consultando passaporte</h1>
-          <p>Verificando os registros do lote...</p>
+
+          <p>
+            Verificando os registros do lote...
+          </p>
         </div>
       </main>
     );
@@ -192,9 +233,17 @@ function PublicPassport({
     return (
       <main className="public-passport public-passport--state">
         <div className="passport-state-card">
-          <span className="passport-state-card__symbol">!</span>
+          <span className="passport-state-card__symbol">
+            !
+          </span>
+
           <h1>Passaporte indisponível</h1>
-          <p>{error || "Documento não encontrado."}</p>
+
+          <p>
+            {error ||
+              "Documento não encontrado."}
+          </p>
+
           <a href="/">Voltar ao TracePass</a>
         </div>
       </main>
@@ -202,10 +251,16 @@ function PublicPassport({
   }
 
   const { batch, movements } = passport;
+
   const lastMovement =
     movements.length > 0
       ? movements[movements.length - 1]
       : null;
+
+  const supplierInitial =
+    batch.supplierName
+      ?.charAt(0)
+      .toUpperCase() ?? "?";
 
   return (
     <main className="public-passport">
@@ -215,16 +270,23 @@ function PublicPassport({
 
           <div>
             <strong>TracePass</strong>
-            <small>Passaporte digital de produto</small>
+
+            <small>
+              Passaporte digital de produto
+            </small>
           </div>
         </a>
 
         <div className="passport-header__actions">
           <button
             type="button"
-            onClick={() => void copyPublicLink()}
+            onClick={() =>
+              void copyPublicLink()
+            }
           >
-            {copied ? "Link copiado" : "Copiar link"}
+            {copied
+              ? "Link copiado"
+              : "Copiar link"}
           </button>
 
           <span className="passport-verified">
@@ -236,29 +298,37 @@ function PublicPassport({
 
       <section className="passport-hero">
         <div className="passport-hero__content">
-          <p>PASSAPORTE DIGITAL VERIFICADO</p>
+          <p>
+            PASSAPORTE DIGITAL VERIFICADO
+          </p>
 
           <h1>{batch.productName}</h1>
 
           <span>
-            Histórico público e rastreável da origem ao
-            destino.
+            Histórico público e rastreável da
+            origem ao destino.
           </span>
 
           <div className="passport-hero__identifiers">
             <div>
               <small>LOTE</small>
-              <strong>{batch.batchCode}</strong>
+              <strong>
+                {batch.batchCode}
+              </strong>
             </div>
 
             <div>
               <small>SKU</small>
-              <strong>{batch.productSku}</strong>
+              <strong>
+                {batch.productSku}
+              </strong>
             </div>
 
             <div>
               <small>EMPRESA</small>
-              <strong>{batch.companyName}</strong>
+              <strong>
+                {batch.companyName}
+              </strong>
             </div>
           </div>
         </div>
@@ -268,14 +338,20 @@ function PublicPassport({
             <span>✓</span>
           </div>
 
-          <strong>Autenticidade confirmada</strong>
-          <small>Registros íntegros no TracePass</small>
+          <strong>
+            Autenticidade confirmada
+          </strong>
+
+          <small>
+            Registros íntegros no TracePass
+          </small>
         </div>
       </section>
 
       <section className="passport-summary">
         <article>
           <span>Status atual</span>
+
           <strong
             className={`passport-status passport-status--${batch.status.toLowerCase()}`}
           >
@@ -285,18 +361,31 @@ function PublicPassport({
 
         <article>
           <span>Fabricação</span>
-          <strong>{formatDate(batch.manufactureDate)}</strong>
+
+          <strong>
+            {formatDate(
+              batch.manufactureDate,
+            )}
+          </strong>
         </article>
 
         <article>
           <span>Validade</span>
-          <strong>{formatDate(batch.expirationDate)}</strong>
+
+          <strong>
+            {formatDate(
+              batch.expirationDate,
+            )}
+          </strong>
         </article>
 
         <article>
           <span>Quantidade</span>
+
           <strong>
-            {formatQuantity(batch.currentQuantity)}{" "}
+            {formatQuantity(
+              batch.currentQuantity,
+            )}{" "}
             {batch.productUnit === "UNIT"
               ? "unidades"
               : batch.productUnit}
@@ -304,9 +393,106 @@ function PublicPassport({
         </article>
       </section>
 
+      <section
+        className={`passport-origin ${
+          batch.supplierId
+            ? ""
+            : "passport-origin--missing"
+        }`}
+      >
+        <div className="passport-origin__introduction">
+          <p>PROCEDÊNCIA EMPRESARIAL</p>
+
+          <h2>
+            Origem registrada do produto
+          </h2>
+
+          <span>
+            Consulte a empresa fornecedora
+            associada à produção deste lote.
+          </span>
+        </div>
+
+        {batch.supplierId ? (
+          <div className="passport-origin__card">
+            <div className="passport-origin__identity">
+              <span className="passport-origin__symbol">
+                {supplierInitial}
+              </span>
+
+              <div>
+                <small>
+                  FORNECEDOR DE ORIGEM
+                </small>
+
+                <strong>
+                  {batch.supplierName}
+                </strong>
+
+                <span>
+                  Empresa associada ao lote{" "}
+                  {batch.batchCode}
+                </span>
+              </div>
+            </div>
+
+            <div className="passport-origin__details">
+              <div>
+                <small>DOCUMENTO</small>
+
+                <strong>
+                  {batch.supplierTaxId ??
+                    "Não informado"}
+                </strong>
+              </div>
+
+              <div>
+                <small>LOCALIZAÇÃO</small>
+
+                <strong>
+                  {getSupplierLocation(batch)}
+                </strong>
+              </div>
+            </div>
+
+            <div className="passport-origin__verification">
+              <span>✓</span>
+
+              <div>
+                <strong>
+                  Vínculo de origem confirmado
+                </strong>
+
+                <small>
+                  Fornecedor associado aos
+                  registros deste lote no
+                  TracePass
+                </small>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="passport-origin__empty">
+            <span>!</span>
+
+            <div>
+              <strong>
+                Fornecedor não informado
+              </strong>
+
+              <small>
+                Este lote ainda não possui uma
+                empresa fornecedora associada.
+              </small>
+            </div>
+          </div>
+        )}
+      </section>
+
       <section className="passport-current-location">
         <div>
           <p>ÚLTIMA ATUALIZAÇÃO</p>
+
           <h2>
             {lastMovement?.locationName ??
               "Localização não informada"}
@@ -314,13 +500,22 @@ function PublicPassport({
 
           {lastMovement && (
             <span>
-              {movementLabels[lastMovement.movementType]} em{" "}
-              {formatDateTime(lastMovement.occurredAt)}
+              {
+                movementLabels[
+                  lastMovement.movementType
+                ]
+              }{" "}
+              em{" "}
+              {formatDateTime(
+                lastMovement.occurredAt,
+              )}
             </span>
           )}
         </div>
 
-        <strong>{movements.length} eventos verificados</strong>
+        <strong>
+          {movements.length} eventos verificados
+        </strong>
       </section>
 
       <section className="passport-journey">
@@ -331,74 +526,94 @@ function PublicPassport({
           </div>
 
           <span>
-            Os registros são apresentados em ordem
-            cronológica.
+            Os registros são apresentados em
+            ordem cronológica.
           </span>
         </div>
 
         <div className="passport-timeline">
-          {movements.map((movement, index) => (
-            <article
-              className="passport-event"
-              key={movement.id}
-            >
-              <div className="passport-event__marker">
-                <span>{index + 1}</span>
-              </div>
-
-              <div className="passport-event__content">
-                <div className="passport-event__top">
-                  <span>
-                    {movementLabels[movement.movementType]}
-                  </span>
-
-                  <time>
-                    {formatDateTime(movement.occurredAt)}
-                  </time>
+          {movements.map(
+            (movement, index) => (
+              <article
+                className="passport-event"
+                key={movement.id}
+              >
+                <div className="passport-event__marker">
+                  <span>{index + 1}</span>
                 </div>
 
-                <h3>{movement.title}</h3>
-
-                {movement.description && (
-                  <p>{movement.description}</p>
-                )}
-
-                <div className="passport-event__metadata">
-                  {movement.locationName && (
+                <div className="passport-event__content">
+                  <div className="passport-event__top">
                     <span>
-                      Local
-                      <strong>
-                        {movement.locationName}
-                      </strong>
+                      {
+                        movementLabels[
+                          movement.movementType
+                        ]
+                      }
                     </span>
+
+                    <time>
+                      {formatDateTime(
+                        movement.occurredAt,
+                      )}
+                    </time>
+                  </div>
+
+                  <h3>{movement.title}</h3>
+
+                  {movement.description && (
+                    <p>
+                      {movement.description}
+                    </p>
                   )}
 
-                  {movement.responsibleName && (
-                    <span>
-                      Responsável
-                      <strong>
-                        {movement.responsibleName}
-                      </strong>
-                    </span>
-                  )}
+                  <div className="passport-event__metadata">
+                    {movement.locationName && (
+                      <span>
+                        Local
 
-                  {movement.quantity !== null && (
-                    <span>
-                      Quantidade
-                      <strong>
-                        {formatQuantity(movement.quantity)}
-                      </strong>
-                    </span>
-                  )}
+                        <strong>
+                          {
+                            movement.locationName
+                          }
+                        </strong>
+                      </span>
+                    )}
+
+                    {movement.responsibleName && (
+                      <span>
+                        Responsável
+
+                        <strong>
+                          {
+                            movement.responsibleName
+                          }
+                        </strong>
+                      </span>
+                    )}
+
+                    {movement.quantity !==
+                      null && (
+                      <span>
+                        Quantidade
+
+                        <strong>
+                          {formatQuantity(
+                            movement.quantity,
+                          )}
+                        </strong>
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ),
+          )}
         </div>
       </section>
 
       <JourneyMap movements={movements} />
-    
+
       <PassportQrCode
         passportId={passport.passportId}
         productName={batch.productName}
@@ -408,20 +623,26 @@ function PublicPassport({
       <footer className="passport-footer">
         <div>
           <strong>TracePass</strong>
+
           <p>
-            Documento público gerado a partir de registros
-            rastreáveis.
+            Documento público gerado a partir
+            de registros rastreáveis.
           </p>
         </div>
 
         <div>
           <span>ID DO PASSAPORTE</span>
-          <code>{passport.passportId}</code>
+
+          <code>
+            {passport.passportId}
+          </code>
         </div>
 
         <small>
           Consultado em{" "}
-          {formatDateTime(passport.generatedAt)}
+          {formatDateTime(
+            passport.generatedAt,
+          )}
         </small>
       </footer>
     </main>
