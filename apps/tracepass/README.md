@@ -18,6 +18,56 @@ A plataforma centraliza empresas, fornecedores, produtos, lotes, movimentações
 
 O projeto pode funcionar de maneira independente ou integrado a outros módulos da Enterprise Suite, como o ColdTrack para monitoramento de temperatura.
 
+## Demonstração visual
+
+> As capturas abaixo utilizam dados demonstrativos para apresentar os principais fluxos do sistema.
+
+### Apresentação do TracePass
+
+![Apresentação inicial do TracePass](docs/images/01-apresentacao.png)
+
+### Painel administrativo
+
+Gestão centralizada das empresas conectadas à plataforma.
+
+![Painel administrativo do TracePass](docs/images/02-painel-administrativo.png)
+
+### Linha do tempo rastreável
+
+Histórico cronológico e permanente da jornada de cada lote.
+
+![Linha do tempo rastreável do lote](docs/images/03-linha-do-tempo.png)
+
+### Rota geográfica
+
+Visualização dos eventos registrados e da trajetória do produto no mapa.
+
+![Mapa da jornada do lote](docs/images/04-mapa-da-jornada.png)
+
+### Passaporte digital público
+
+Documento público com autenticidade, procedência e informações do lote.
+
+![Passaporte digital público](docs/images/05-passaporte-digital.png)
+
+### Segurança operacional
+
+Histórico de ocorrências, bloqueios preventivos e tratamentos concluídos.
+
+![Segurança e conformidade do lote](docs/images/06-seguranca-operacional.png)
+
+### QR Code do produto
+
+Acesso ao passaporte digital por meio de um QR Code que pode ser adicionado à embalagem.
+
+![QR Code do passaporte digital](docs/images/07-qr-code.png)
+
+### Documentação da API
+
+API REST organizada e documentada com Swagger e OpenAPI.
+
+![Documentação Swagger da API](docs/images/08-swagger-api.png)
+
 ## Problemas que o projeto resolve
 
 - Falta de visibilidade sobre a origem dos produtos.
