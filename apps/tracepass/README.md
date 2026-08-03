@@ -18,6 +18,17 @@ A plataforma centraliza empresas, fornecedores, produtos, lotes, movimentações
 
 O projeto pode funcionar de maneira independente ou integrado a outros módulos da Enterprise Suite, como o ColdTrack para monitoramento de temperatura.
 
+## Aplicação publicada
+
+| Recurso | Endereço |
+|---|---|
+| Demonstração web | [tracepass-enterprise.vercel.app](https://tracepass-enterprise.vercel.app) |
+| API REST | [tracepass-api.onrender.com](https://tracepass-api.onrender.com) |
+| Swagger/OpenAPI | [Documentação interativa](https://tracepass-api.onrender.com/swagger-ui/index.html) |
+| Saúde da API | [Actuator Health](https://tracepass-api.onrender.com/actuator/health) |
+
+> A aplicação utiliza Vercel no frontend, Render no backend e PostgreSQL gerenciado pelo Neon. Como o backend utiliza uma instância gratuita para demonstração, o primeiro acesso pode levar alguns segundos.
+
 ## Demonstração visual
 
 > As capturas abaixo utilizam dados demonstrativos para apresentar os principais fluxos do sistema.

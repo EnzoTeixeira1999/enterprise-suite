@@ -53,6 +53,16 @@ Principais recursos:
 
 [Consultar documentação completa do TracePass](apps/tracepass/README.md)
 
+
+### Acessos online
+
+- [Abrir demonstração do TracePass](https://tracepass-enterprise.vercel.app)
+- [Consultar API publicada](https://tracepass-api.onrender.com)
+- [Abrir documentação Swagger](https://tracepass-api.onrender.com/swagger-ui/index.html)
+- [Verificar saúde da API](https://tracepass-api.onrender.com/actuator/health)
+
+> A API utiliza uma instância gratuita para demonstração. No primeiro acesso, ela pode levar alguns segundos para iniciar.
+
 ## Módulos da plataforma
 
 | Módulo | Objetivo | Situação |
@@ -188,7 +198,7 @@ Cada projeto da Enterprise Suite seguirá as seguintes etapas:
 - [x] Criar a demonstração visual do TracePass.
 - [x] Documentar a API com Swagger.
 - [x] Criar testes automatizados.
-- [ ] Publicar o TracePass em ambiente de demonstração.
+- [x] Publicar o TracePass em ambiente de demonstração.
 - [ ] Criar autenticação e controle de acesso.
 - [ ] Desenvolver o ColdTrack.
 - [ ] Integrar ColdTrack e TracePass.
