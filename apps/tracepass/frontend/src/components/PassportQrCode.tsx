@@ -18,14 +18,48 @@ function PassportQrCode({
   const publicUrl = window.location.href;
 
   function downloadQrCode() {
-    const canvas =
+    const qrCanvas =
       qrContainerRef.current?.querySelector("canvas");
 
-    if (!canvas) {
+    if (!qrCanvas) {
       return;
     }
 
-    const imageUrl = canvas.toDataURL("image/png");
+    const padding = 32;
+
+    const exportCanvas =
+      document.createElement("canvas");
+
+    exportCanvas.width =
+      qrCanvas.width + padding * 2;
+
+    exportCanvas.height =
+      qrCanvas.height + padding * 2;
+
+    const context =
+      exportCanvas.getContext("2d");
+
+    if (!context) {
+      return;
+    }
+
+    context.fillStyle = "#ffffff";
+    context.fillRect(
+      0,
+      0,
+      exportCanvas.width,
+      exportCanvas.height,
+    );
+
+    context.drawImage(
+      qrCanvas,
+      padding,
+      padding,
+    );
+
+    const imageUrl =
+      exportCanvas.toDataURL("image/png");
+
     const downloadLink =
       document.createElement("a");
 
@@ -33,7 +67,9 @@ function PassportQrCode({
     downloadLink.download =
       `tracepass-${batchCode.toLowerCase()}.png`;
 
+    document.body.appendChild(downloadLink);
     downloadLink.click();
+    downloadLink.remove();
   }
 
   return (
@@ -41,7 +77,9 @@ function PassportQrCode({
       <div className="passport-qr-content">
         <p>ACESSO INSTANTÂNEO</p>
 
-        <h2>Leve este passaporte com o produto.</h2>
+        <h2>
+          Leve este passaporte com o produto.
+        </h2>
 
         <span>
           Imprima ou adicione este QR Code à embalagem.
@@ -82,7 +120,9 @@ function PassportQrCode({
           />
         </div>
 
-        <strong>Escaneie para verificar</strong>
+        <strong>
+          Escaneie para verificar
+        </strong>
 
         <span>
           Documento público emitido pelo TracePass
