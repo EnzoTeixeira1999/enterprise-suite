@@ -1,21 +1,27 @@
 import { useRef } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import { getPassportShareUrl } from "../services/passportShare";
 
 type PassportQrCodeProps = {
   passportId: string;
   productName: string;
   batchCode: string;
+  example?: boolean;
+  workspace?: boolean;
 };
+
 
 function PassportQrCode({
   passportId,
   productName,
   batchCode,
+  example = false,
+  workspace = false,
 }: PassportQrCodeProps) {
   const qrContainerRef =
     useRef<HTMLDivElement | null>(null);
 
-  const publicUrl = window.location.href;
+  const publicUrl = getPassportShareUrl();
 
   function downloadQrCode() {
     const qrCanvas =
@@ -78,13 +84,11 @@ function PassportQrCode({
         <p>ACESSO INSTANTÂNEO</p>
 
         <h2>
-          Leve este passaporte com o produto.
+          {workspace ? "Acesse o passaporte de teste" : example ? "Compartilhe este exemplo" : "Compartilhe o passaporte"}
         </h2>
 
         <span>
-          Imprima ou adicione este QR Code à embalagem.
-          Clientes, transportadoras e parceiros poderão
-          consultar a jornada completa.
+          {workspace ? "Os registros de teste ficam neste navegador. Este endereço só encontra o lote onde ele foi cadastrado." : example ? "No site publicado, o QR Code abre este exemplo no navegador do celular." : "Baixe o QR Code para incluir na embalagem ou em um documento. Quem escanear abre este passaporte."}
         </span>
 
         <div className="passport-qr-details">
@@ -115,17 +119,17 @@ function PassportQrCode({
             size={210}
             level="H"
             bgColor="#ffffff"
-            fgColor="#061521"
+            fgColor="#141014"
             title={`Passaporte digital do lote ${batchCode}`}
           />
         </div>
 
         <strong>
-          Escaneie para verificar
+          Escaneie para abrir
         </strong>
 
         <span>
-          Documento público emitido pelo TracePass
+          {example || workspace ? "Passaporte demonstrativo do TracePass" : "Documento público emitido pelo TracePass"}
         </span>
 
         <button

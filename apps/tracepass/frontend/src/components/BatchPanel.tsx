@@ -4,6 +4,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { batchPassportPath } from "../services/demoWorkspace";
 import { apiFetch } from "../services/api";
 
 type CompanyOption = {
@@ -85,6 +86,7 @@ type BatchForm = {
 
 type BatchPanelProps = {
   companies: CompanyOption[];
+  onCreated?: () => void;
 };
 
 const today = new Date()
@@ -118,6 +120,7 @@ const unitLabels: Record<ProductUnit, string> = {
 
 function BatchPanel({
   companies,
+  onCreated,
 }: BatchPanelProps) {
   const [
     selectedCompanyId,
@@ -421,6 +424,7 @@ function BatchPanel({
           currentForm.supplierId,
       }));
 
+      onCreated?.();
       setMessageType("success");
       setMessage(
         "Lote cadastrado e fornecedor vinculado com sucesso.",
@@ -905,7 +909,7 @@ function BatchPanel({
 
                       <a
                         className="batch-passport-link"
-                        href={`/passport/${batch.id}`}
+                        href={batchPassportPath(batch.id)}
                         target="_blank"
                         rel="noreferrer"
                         aria-label={`Abrir passaporte público do lote ${batch.batchCode}`}

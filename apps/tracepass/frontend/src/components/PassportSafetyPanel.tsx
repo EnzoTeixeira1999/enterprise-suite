@@ -89,10 +89,10 @@ const safetyContent: Record<
   }
 > = {
   CLEAR: {
-    label: "SITUAÇÃO SEGURA",
-    title: "Lote aprovado e sem alertas ativos",
+    label: "SEM OCORRÊNCIAS ATIVAS",
+    title: "Sem alertas de ocorrência ativos",
     description:
-      "Todas as ocorrências registradas foram tratadas e o lote está autorizado a operar.",
+      "Este resumo considera as ocorrências registradas. Consulte a validade na ficha do lote.",
     symbol: "✓",
   },
   ATTENTION: {
@@ -169,7 +169,7 @@ function PassportSafetyPanel({
         <article>
           <span>Ocorrências ativas</span>
 
-          <strong>
+          <strong data-metric-tone={safety.activeIncidents > 0 ? "attention" : undefined}>
             {safety.activeIncidents}
           </strong>
 
@@ -193,7 +193,7 @@ function PassportSafetyPanel({
         <article>
           <span>Riscos críticos ativos</span>
 
-          <strong>
+          <strong data-metric-tone={safety.criticalActiveIncidents > 0 ? "urgent" : undefined}>
             {safety.criticalActiveIncidents}
           </strong>
 
