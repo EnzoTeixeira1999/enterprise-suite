@@ -1,391 +1,104 @@
 # TracePass
 
-Plataforma empresarial de rastreabilidade que acompanha a jornada completa de produtos e lotes, desde o fornecedor de origem até o destino final.
+Rastreabilidade de produtos por lote, do fornecedor de origem ao destino. O painel registra o que aconteceu com cada remessa. O passaporte digital reúne esses registros em uma consulta que pode ser compartilhada por link ou QR Code.
 
-![Java](https://img.shields.io/badge/Java-21-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-brightgreen)
-![React](https://img.shields.io/badge/React-19-61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
-![Status](https://img.shields.io/badge/Status-MVP%20Funcional-52F2BF)
+[TracePass na Vercel](https://tracepass-enterprise.vercel.app) · [API interativa (Swagger)](https://tracepass-api.onrender.com/swagger-ui/index.html)
 
-## Visão geral
+![Ilustração da jornada de uma remessa, com três pontos ligados por uma linha carmim sobre um mapa escuro](frontend/src/assets/tracepass-route-illustration.webp)
 
-O TracePass foi desenvolvido para oferecer transparência, segurança e controle sobre a cadeia de movimentação de produtos.
+*Ilustração da página inicial. O mapa interativo da demonstração usa os locais registrados para o lote.*
 
-A plataforma centraliza empresas, fornecedores, produtos, lotes, movimentações logísticas e ocorrências operacionais. Cada lote recebe um passaporte digital público com histórico cronológico, mapa da jornada, procedência empresarial, QR Code e situação de segurança.
+## Experimente em três passos
 
-O projeto pode funcionar de maneira independente ou integrado a outros módulos da Enterprise Suite, como o ColdTrack para monitoramento de temperatura.
+Abra a demonstração pelo botão **Testar o TracePass** na página inicial. O cenário traz uma empresa, um produto, um fornecedor e um lote fictícios. A demonstração roda no navegador e os registros criados ficam nele.
 
-## Aplicação publicada
+| Passo | Onde ir | O que fazer |
+| --- | --- | --- |
+| **1. Escolha o lote** | **Lotes** | Use o lote já cadastrado. Para montar outro cenário, cadastre produto e fornecedor na mesma empresa e vincule os dois ao novo lote. |
+| **2. Registre um evento** | **Movimentações** | Informe o tipo, o título, o local e o horário. Use o zoom e arraste o mapa para navegar. Clique no local desejado e escolha **Adicionar evento**. |
+| **3. Consulte o resultado** | **Lotes → Ver passaporte** | Abra o passaporte do mesmo lote. Confira o evento na jornada e selecione **Destacar no mapa** para localizar o ponto. |
 
-| Recurso | Endereço |
-|---|---|
-| Demonstração web | [tracepass-enterprise.vercel.app](https://tracepass-enterprise.vercel.app) |
-| API REST | [tracepass-api.onrender.com](https://tracepass-api.onrender.com) |
-| Swagger/OpenAPI | [Documentação interativa](https://tracepass-api.onrender.com/swagger-ui/index.html) |
-| Saúde da API | [Actuator Health](https://tracepass-api.onrender.com/actuator/health) |
+O botão **Ver Passaporte** no topo da demonstração abre uma amostra pronta. Para ver os dados que você acabou de registrar, abra o passaporte do lote correspondente em **Lotes**. Para simular avaria ou outro desvio, entre em **Ocorrências**, escolha o lote e acompanhe o registro até a resolução.
 
-> A aplicação utiliza Vercel no frontend, Render no backend e PostgreSQL gerenciado pelo Neon. Como o backend utiliza uma instância gratuita para demonstração, o primeiro acesso pode levar alguns segundos.
+## Como os dados se conectam
 
-### Cartografia
+~~~mermaid
+flowchart LR
+    E[Empresa] --> P[Produto]
+    E --> F[Fornecedor]
+    P --> L[Lote]
+    F --> L
+    L --> M[Movimentações]
+    L --> O[Ocorrências, quando houver]
+    L --> D[Passaporte digital]
+    M --> D
+    O --> D
+~~~
 
-O mapa interativo usa os blocos do OpenStreetMap por padrão, conforme a [política de uso](https://operations.osmfoundation.org/policies/tiles/). Para usar outro provedor, defina `VITE_MAP_TILE_URL` e `VITE_MAP_TILE_ATTRIBUTION` no build do frontend. A base regional de contingência reúne limites municipais do IBGE e vias derivadas de [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright). O arquivo `grande-florianopolis-roads.json` é distribuído sob a [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/).
+Produtos e fornecedores podem ser cadastrados em qualquer ordem. O lote identifica a remessa e associa o produto ao fornecedor de origem. As movimentações registram eventos ao longo do tempo. Ocorrências de gravidade alta ou crítica podem acionar bloqueio preventivo.
 
-## Demonstração visual
-
-> As capturas abaixo utilizam dados demonstrativos para apresentar os principais fluxos do sistema.
-
-### Apresentação do TracePass
-
-![Apresentação inicial do TracePass](docs/images/01-apresentacao.png)
-
-### Painel administrativo
-
-Gestão centralizada das empresas conectadas à plataforma.
-
-![Painel administrativo do TracePass](docs/images/02-painel-administrativo.png)
-
-### Linha do tempo rastreável
-
-Histórico cronológico e permanente da jornada de cada lote.
-
-![Linha do tempo rastreável do lote](docs/images/03-linha-do-tempo.png)
-
-### Rota geográfica
-
-Visualização dos eventos registrados e da trajetória do produto no mapa.
-
-![Mapa da jornada do lote](docs/images/04-mapa-da-jornada.png)
-
-### Passaporte digital público
-
-Documento público com autenticidade, procedência e informações do lote.
-
-![Passaporte digital público](docs/images/05-passaporte-digital.png)
-
-### Segurança operacional
-
-Histórico de ocorrências, bloqueios preventivos e tratamentos concluídos.
-
-![Segurança e conformidade do lote](docs/images/06-seguranca-operacional.png)
-
-### QR Code do produto
-
-Acesso ao passaporte digital por meio de um QR Code que pode ser adicionado à embalagem.
-
-![QR Code do passaporte digital](docs/images/07-qr-code.png)
-
-### Documentação da API
-
-API REST organizada e documentada com Swagger e OpenAPI.
-
-![Documentação Swagger da API](docs/images/08-swagger-api.png)
-
-## Problemas que o projeto resolve
-
-- Falta de visibilidade sobre a origem dos produtos.
-- Informações logísticas espalhadas em diferentes sistemas.
-- Dificuldade para acompanhar a jornada de um lote.
-- Ausência de um histórico confiável de movimentações.
-- Falta de controle sobre desvios, danos e alertas.
-- Continuidade indevida da operação após uma ocorrência crítica.
-- Dificuldade para apresentar informações ao cliente final.
-
-## Principais funcionalidades
-
-### Gestão empresarial
-
-- Cadastro e gerenciamento de empresas.
-- Cadastro de fornecedores e procedência empresarial.
-- Cadastro de produtos por empresa.
-- Cadastro e controle de lotes.
-- Associação entre fornecedor, produto e lote.
-
-### Rastreabilidade
-
-- Linha do tempo cronológica dos lotes.
-- Registro de produção, armazenamento e transporte.
-- Registro de despacho, recebimento e conclusão.
-- Registro da localização geográfica de cada evento.
-- Visualização da rota em mapa interativo.
-- Histórico permanente das movimentações.
-
-### Segurança operacional
-
-- Registro de ocorrências de rastreabilidade.
-- Classificação por tipo e gravidade.
-- Estados de ocorrência aberta, em investigação e resolvida.
-- Bloqueio automático para ocorrências graves ou críticas.
-- Controle de investigação e resolução.
-- Liberação controlada depois do tratamento das ocorrências.
-- Registro da liberação na linha do tempo do lote.
-
-### Passaporte digital público
-
-- Consulta pública por identificador único.
-- Informações do produto, lote e empresa.
-- Procedência e fornecedor de origem.
-- Histórico completo de movimentações.
-- Mapa geográfico da jornada.
-- Histórico público de segurança.
-- Status de autenticidade e conformidade.
-- Geração e download de QR Code.
-- Link compartilhável para consulta externa.
-
-### Documentação e monitoramento
-
-- Documentação interativa da API com Swagger/OpenAPI.
-- Monitoramento da aplicação com Spring Boot Actuator.
-- Migrações versionadas do banco de dados com Flyway.
-- Testes automatizados dos principais fluxos de negócio.
+O mapa conecta os pontos informados em ordem cronológica. A linha pontilhada indica a sequência de registros, sem inferir o caminho rodoviário percorrido. Os números em branco indicam contagens comuns, amarelo sinaliza atenção e vermelho identifica riscos ativos urgentes.
 
 ## Arquitetura
 
-```mermaid
-flowchart TD
-    ADMIN["Painel administrativo React"] --> API["API REST Spring Boot"]
-    PUBLIC["Passaporte digital público"] --> API
-    API --> DB["PostgreSQL"]
-    API --> DOCS["Swagger e Actuator"]
-    ADMIN --> MAPS["Leaflet e OpenStreetMap"]
-```
+~~~mermaid
+flowchart LR
+    U[Navegador] --> F[React + TypeScript]
+    F --> A[API REST Spring Boot]
+    A --> P[(PostgreSQL)]
+    F --> D[Dados fictícios locais no laboratório]
+    F --> M[Cartografia via Leaflet]
+~~~
 
-O frontend administrativo e o passaporte público consomem a mesma API REST. A API aplica as regras de negócio e utiliza PostgreSQL para preservar os registros.
+- **Frontend:** React, TypeScript, Vite e Leaflet.
+- **Backend:** Java 21, Spring Boot, JPA e Flyway.
+- **Dados e hospedagem:** PostgreSQL, Docker Compose para desenvolvimento, Vercel para o frontend e Render para a API.
 
-## Tecnologias utilizadas
+| Caminho | Conteúdo |
+| --- | --- |
+| `frontend/` | Apresentação, painel, demonstração e passaporte |
+| `backend/tracepass-api/` | API, regras de negócio e migrações |
+| `compose.yaml` | PostgreSQL para desenvolvimento local |
 
-### Backend
+## Execute localmente
 
-- Java 21
-- Spring Boot 4
-- Spring Web MVC
-- Spring Data JPA
-- Hibernate
-- Jakarta Validation
-- Flyway
-- PostgreSQL
-- Spring Boot Actuator
-- Swagger e OpenAPI
-- Maven
-- JUnit 5
-- Mockito
+### Somente a demonstração
 
-### Frontend
+Requer Node.js 22.12 ou posterior na série 22, ou Node.js 20.19 ou posterior na série 20. A partir da raiz do repositório:
 
-- React 19
-- TypeScript
-- Vite
-- React Leaflet
-- Leaflet
-- OpenStreetMap
-- QR Code
-- CSS responsivo
-
-### Infraestrutura
-
-- Docker Desktop
-- Docker Compose
-- PostgreSQL 17 Alpine
-- Git
-
-## Estrutura do projeto
-
-```text
-apps/tracepass
-├── backend
-│   └── tracepass-api
-│       ├── src/main/java
-│       ├── src/main/resources
-│       │   └── db/migration
-│       ├── src/test/java
-│       ├── mvnw.cmd
-│       └── pom.xml
-├── frontend
-│   ├── src
-│   ├── package.json
-│   └── vite.config.ts
-├── .env.example
-├── compose.yaml
-└── README.md
-```
-
-## Fluxo principal
-
-1. Uma empresa é cadastrada.
-2. A empresa registra seus fornecedores.
-3. Um produto é cadastrado.
-4. Um lote é criado e associado ao fornecedor de origem.
-5. As movimentações são adicionadas à linha do tempo.
-6. Cada movimentação pode conter localização geográfica.
-7. Ocorrências podem bloquear automaticamente o lote.
-8. A equipe investiga e resolve as ocorrências.
-9. O lote somente retorna à operação após uma liberação controlada.
-10. O cliente consulta toda a jornada pelo passaporte digital público.
-
-## Endpoints principais
-
-| Método | Endpoint | Finalidade |
-|---|---|---|
-| `GET/POST` | `/api/companies` | Consultar e cadastrar empresas |
-| `GET/POST` | `/api/companies/{companyId}/suppliers` | Gerenciar fornecedores |
-| `GET/POST` | `/api/companies/{companyId}/products` | Gerenciar produtos |
-| `GET/POST` | `/api/companies/{companyId}/products/{productId}/batches` | Gerenciar lotes |
-| `GET/POST` | `/api/companies/{companyId}/products/{productId}/batches/{batchId}/movements` | Consultar e registrar movimentações |
-| `GET/POST` | `/api/companies/{companyId}/products/{productId}/batches/{batchId}/incidents` | Consultar e registrar ocorrências |
-| `PATCH` | `/api/companies/{companyId}/products/{productId}/batches/{batchId}/incidents/{incidentId}/investigation` | Iniciar investigação |
-| `PATCH` | `/api/companies/{companyId}/products/{productId}/batches/{batchId}/incidents/{incidentId}/resolve` | Resolver ocorrência |
-| `POST` | `/api/companies/{companyId}/products/{productId}/batches/{batchId}/release` | Autorizar liberação do lote |
-| `GET` | `/api/public/passports/{batchId}` | Consultar passaporte público |
-
-A relação completa de endpoints pode ser consultada no Swagger.
-
-## Como executar localmente
-
-### Pré-requisitos
-
-Antes de iniciar, instale:
-
-- Git
-- Java JDK 21
-- Node.js e npm
-- Docker Desktop
-
-### 1. Configurar o ambiente
-
-Na pasta do TracePass, copie o arquivo de exemplo:
-
-```powershell
-cd apps\tracepass
-
-Copy-Item .env.example .env
-```
-
-Confira os valores locais do PostgreSQL no arquivo `.env`.
-
-O arquivo `.env` contém configurações locais e não deve ser enviado ao repositório.
-
-### 2. Iniciar o PostgreSQL
-
-```powershell
-docker compose up -d
-```
-
-Verifique se o banco está saudável:
-
-```powershell
-docker compose ps
-```
-
-### 3. Iniciar o backend
-
-```powershell
-cd backend\tracepass-api
-
-.\mvnw.cmd spring-boot:run
-```
-
-A API ficará disponível em:
-
-```text
-http://localhost:8080
-```
-
-### 4. Iniciar o frontend
-
-Abra outro terminal:
-
-```powershell
-cd apps\tracepass\frontend
-
-npm install
+~~~powershell
+cd apps/tracepass/frontend
+npm ci
 npm run dev
-```
+~~~
 
-O frontend ficará disponível em:
+Abra **http://localhost:5173/laboratorio** para testar operações com dados fictícios ou **http://localhost:5173/demo** para consultar o passaporte de amostra. Essas duas rotas podem ser usadas sem iniciar a API.
 
-```text
-http://localhost:5173
-```
+### API e banco de dados
 
-## Endereços úteis
+Requer Java 21 e Docker com Compose. Em outro terminal, a partir da raiz do repositório:
 
-| Serviço | Endereço |
-|---|---|
-| Aplicação web | `http://localhost:5173` |
-| API | `http://localhost:8080` |
-| Saúde da API | `http://localhost:8080/actuator/health` |
-| Swagger | `http://localhost:8080/swagger-ui/index.html` |
-| OpenAPI JSON | `http://localhost:8080/v3/api-docs` |
+~~~powershell
+cd apps/tracepass
+Copy-Item .env.example .env
+docker compose up -d
+cd backend/tracepass-api
+.\mvnw.cmd spring-boot:run
+~~~
 
-## Testes
+O Vite encaminha as chamadas da aplicação local para a API na porta `8080`. Em instalações com autenticação administrativa habilitada, configure `TRACEPASS_ADMIN_TOKEN` no backend e informe a chave na interface. Para implantar o frontend em outro ambiente, use `VITE_API_URL` com o endereço da API. Mantenha a chave administrativa fora das variáveis `VITE_*` e dos arquivos versionados.
 
-Para executar os testes automatizados do backend:
+### Verificações
 
-```powershell
-cd apps\tracepass\backend\tracepass-api
+- No frontend, execute `npm run lint` e `npm run build`.
+- No backend, execute `.\mvnw.cmd test` com o ambiente de teste configurado.
 
-.\mvnw.cmd test
-```
+## Cartografia
 
-Resultado atual:
+O mapa mundial usa o [OpenStreetMap](https://www.openstreetmap.org/copyright) conforme a [política de uso dos blocos](https://operations.osmfoundation.org/policies/tiles/). Para trocar de provedor, defina `VITE_MAP_TILE_URL` e `VITE_MAP_TILE_ATTRIBUTION` antes do build. Em caso de falha do provedor, os pontos continuam disponíveis e a cartografia de contingência cobre a Grande Florianópolis.
 
-```text
-Tests run: 7
-Failures: 0
-Errors: 0
-Skipped: 0
-```
-
-Para verificar o frontend:
-
-```powershell
-cd apps\tracepass\frontend
-
-npm run build
-```
-
-## Regras de negócio demonstradas
-
-- Um código de lote não pode se repetir no mesmo produto.
-- A validade não pode ser anterior à fabricação.
-- A quantidade atual não pode superar a quantidade inicial.
-- Latitude e longitude devem ser informadas juntas.
-- Ocorrências graves ou críticas podem bloquear automaticamente o lote.
-- Um lote com ocorrências pendentes não pode ser liberado.
-- A liberação cria um novo evento na linha do tempo.
-- O histórico de ocorrências continua disponível depois da resolução.
-- O passaporte público informa se existem riscos ativos.
-
-## Estado atual
-
-O TracePass possui um MVP funcional com:
-
-- Backend integrado ao PostgreSQL.
-- Interface administrativa.
-- Passaporte digital público.
-- Mapas interativos.
-- QR Code.
-- Controle de fornecedores e procedência.
-- Linha do tempo logística.
-- Gestão de ocorrências.
-- Bloqueio e liberação controlada.
-- Testes automatizados.
-- Documentação Swagger.
-
-## Próximas evoluções
-
-- Autenticação e autorização por perfis.
-- Dashboard com múltiplas filiais.
-- Integração com sensores do ColdTrack.
-- Alertas e notificações em tempo real.
-- Pipeline de integração e entrega contínua.
-- Implantação em ambiente de nuvem.
-- Integração com os demais módulos da Enterprise Suite.
+A base de contingência combina limites municipais do IBGE e vias derivadas de © OpenStreetMap contributors. O arquivo `grande-florianopolis-roads.json` é distribuído sob a [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/).
 
 ## Autor
 
-Desenvolvido por **Enzo Teixeira Alves** como parte da Enterprise Suite, uma coleção de soluções empresariais independentes e integráveis.
-
-Portfólio: [portifolio-enzo-xi.vercel.app](https://portifolio-enzo-xi.vercel.app)
+Enzo Teixeira Alves · [Portfólio](https://portifolio-enzo-xi.vercel.app/pt)

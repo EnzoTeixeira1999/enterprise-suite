@@ -397,7 +397,7 @@ function PublicPassport({
           </div>
 
           <span>
-            Abra os detalhes para consultar o registro ou destaque o local no mapa.
+            Use os números para comparar os registros com os pontos do mapa. Abra os detalhes para ver as informações de cada evento.
           </span>
         </div>
 

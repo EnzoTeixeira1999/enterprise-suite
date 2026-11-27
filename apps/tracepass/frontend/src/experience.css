@@ -1107,6 +1107,23 @@
 .app--dashboard .batch-overview { margin-top: 18px; }
 .app--dashboard .header__actions a { text-decoration: none; }
 
+.app--dashboard :is(.company-item__symbol, .supplier-item__symbol) {
+  border-color: #784256;
+  background: #35212d;
+  color: #f8aec5;
+}
+
+.app--dashboard :is(.company-item__content p, .company-item__content small, .company-item__document span,
+.product-item > p, .product-item__details > span, .supplier-item__identity p) { color: #d2c2cc; }
+
+.app--dashboard :is(.company-item__document strong, .product-item__details strong) {
+  color: #f4efea;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.app--dashboard :is(.panel input, .panel textarea)::placeholder { color: #ad9ca7; }
+
 .app--dashboard .location-picker .leaflet-container { background: #211b23; }
 
 
@@ -1285,3 +1302,70 @@
 
 :is(.app--dashboard, .passport-redesign) strong[data-metric-tone="attention"] { color: #ffd36a; }
 :is(.app--dashboard, .passport-redesign) strong[data-metric-tone="urgent"] { color: #ff737e; }
+
+.landing-guide,
+.workspace-quickstart {
+  border: 1px solid #4b3542;
+  border-radius: 14px;
+  background: #19141b;
+}
+
+.landing-guide { margin: 24px 0; padding: clamp(18px, 3vw, 32px); }
+.landing-guide > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.landing-guide h2 { margin: 0; font-size: clamp(1.35rem, 2vw, 1.8rem); }
+.landing-guide > header p { margin: 6px 0 0; color: #d2c2cc; }
+.landing-guide > header a { gap: 8px; }
+
+.workspace-quickstart { margin-bottom: 16px; padding: 14px 18px; }
+.workspace-quickstart summary { cursor: pointer; color: #f6d9e3; font-weight: 700; }
+.workspace-quickstart summary::marker { color: #ee93ae; }
+
+.demo-guide-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 10px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+.demo-guide-list li {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  border: 1px solid #4b3542;
+  border-radius: 10px;
+  background: #241923;
+  padding: 14px;
+}
+.demo-guide-list li > span {
+  display: grid;
+  flex: 0 0 1.6rem;
+  height: 1.6rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #8d1e40;
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 700;
+}
+.demo-guide-list h3 { margin: 2px 0 5px; font-size: .95rem; }
+.demo-guide-list p { margin: 0; color: #d2c2cc; font-size: .86rem; line-height: 1.55; }
+
+:is(.app, .public-passport) :is(button, a, summary, input, select, textarea):focus-visible {
+  outline: 2px solid #ff9eba;
+  outline-offset: 3px;
+}
+
+:is(.journey-map, .location-picker__map) .leaflet-bar a {
+  border-bottom-color: #513745;
+  background: #211720;
+  color: #fff;
+}
+:is(.journey-map, .location-picker__map) .leaflet-bar a:hover { background: #3c2332; }
+:is(.journey-map, .location-picker__map) .leaflet-bar a.leaflet-disabled { color: #ab929e; }

@@ -136,8 +136,8 @@ function LocationPicker({
         <div>
           <strong>Local deste evento</strong>
           <span>
-            O ponto verde é o evento anterior. Clique no mapa
-            para marcar onde o novo evento aconteceu.
+            Arraste para navegar e use + ou − para ajustar o zoom. Clique
+            para marcar o local do evento. Pode escolher um ponto em outro país.
           </span>
         </div>
 

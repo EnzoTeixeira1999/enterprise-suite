@@ -24,6 +24,25 @@ const previewStops = [
   { title: "Chegada", description: "Recebimento no destino" },
 ];
 
+const demoGuide = [
+  { title: "Abra um lote", description: "Vá a Lotes para usar a remessa fictícia que já vem cadastrada. Também é possível cadastrar seu próprio produto, fornecedor e lote." },
+  { title: "Registre um evento", description: "Em Movimentações, selecione o lote, informe o evento e marque o local no mapa. Salve para acrescentar o ponto à jornada." },
+  { title: "Confira o passaporte", description: "Em Lotes, abra o passaporte do mesmo lote e compare o mapa com a linha do tempo. Use Ocorrências se precisar simular um desvio." },
+];
+
+function DemoGuide() {
+  return (
+    <ol className="demo-guide-list">
+      {demoGuide.map(({ title, description }, index) => (
+        <li key={title}>
+          <span aria-hidden="true">{index + 1}</span>
+          <div><h3>{title}</h3><p>{description}</p></div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 type View = "landing" | "dashboard";
 const workflowSteps = ["Empresas", "Produtos", "Fornecedores", "Lotes", "Movimentações"] as const;
 type Area = typeof workflowSteps[number] | "Ocorrências";
@@ -347,6 +366,16 @@ function App() {
             <article><span aria-hidden="true">⇄</span><div><h2>O que mudou no caminho?</h2><p>Veja as movimentações e como cada ocorrência foi tratada.</p></div></article>
             <article><span aria-hidden="true">▦</span><div><h2>Como consultar?</h2><p>Abra o passaporte pelo QR Code ou compartilhe o link.</p></div></article>
           </section>
+          <section className="landing-guide" aria-labelledby="landing-guide-title">
+            <header>
+              <div>
+                <h2 id="landing-guide-title">Como testar o TracePass</h2>
+                <p>Use o cenário fictício para acompanhar uma remessa do registro ao passaporte.</p>
+              </div>
+              <a className="landing-passport-link" href={demoWorkspacePath}>Abrir demonstração <span aria-hidden="true">↗</span></a>
+            </header>
+            <DemoGuide />
+          </section>
         </>
       ) : (
         <section className="dashboard">
@@ -359,6 +388,12 @@ function App() {
             </div>
             {isWorkshop && <a className="landing-passport-link" href={demoPath}>Ver Passaporte</a>}
           </header>
+          {isWorkshop && (
+            <details className="workspace-quickstart">
+              <summary>Como testar com o lote pronto</summary>
+              <DemoGuide />
+            </details>
+          )}
           <section className="workspace-flow" aria-labelledby="workspace-flow-title">
             <div className="workspace-flow__heading">
               <h2 id="workspace-flow-title">Fluxo de rastreabilidade</h2>
