@@ -29,6 +29,10 @@ O projeto pode funcionar de maneira independente ou integrado a outros módulos 
 
 > A aplicação utiliza Vercel no frontend, Render no backend e PostgreSQL gerenciado pelo Neon. Como o backend utiliza uma instância gratuita para demonstração, o primeiro acesso pode levar alguns segundos.
 
+### Cartografia
+
+O mapa interativo usa os blocos do OpenStreetMap por padrão, conforme a [política de uso](https://operations.osmfoundation.org/policies/tiles/). Para usar outro provedor, defina `VITE_MAP_TILE_URL` e `VITE_MAP_TILE_ATTRIBUTION` no build do frontend. A base regional de contingência reúne limites municipais do IBGE e vias derivadas de [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright). O arquivo `grande-florianopolis-roads.json` é distribuído sob a [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/).
+
 ## Demonstração visual
 
 > As capturas abaixo utilizam dados demonstrativos para apresentar os principais fluxos do sistema.

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { demoPath } from "../demoPassport";
 import JourneyMap from "./JourneyMap";
 import PassportQrCode from "./PassportQrCode";
+import { getPassportShareUrl } from "../services/passportShare";
+import { demoWorkspacePath } from "../services/demoWorkspace";
 import PassportSafetyPanel, {
   type PassportSafety,
 } from "./PassportSafetyPanel";
@@ -72,7 +75,7 @@ type PassportMovement = {
   createdAt: string;
 };
 
-type PassportData = {
+export type PassportData = {
   passportId: string;
   verificationStatus: string;
   batch: PassportBatch;
@@ -83,6 +86,8 @@ type PassportData = {
 
 type PublicPassportProps = {
   passportId: string;
+  example?: PassportData;
+  workspace?: boolean;
 };
 
 const batchStatusLabels: Record<
@@ -154,19 +159,27 @@ function getSupplierLocation(
 
 function PublicPassport({
   passportId,
+  example,
+  workspace = false,
 }: PublicPassportProps) {
   const [passport, setPassport] =
-    useState<PassportData | null>(null);
+    useState<PassportData | null>(example ?? null);
 
   const [loading, setLoading] =
-    useState(true);
+    useState(!example);
+  const [attempt, setAttempt] = useState(0);
+  const [selectedEvent, setSelectedEvent] = useState<string>();
 
   const [error, setError] = useState("");
 
+  const [showShareLink, setShowShareLink] = useState(false);
   const [copied, setCopied] =
     useState(false);
 
   useEffect(() => {
+    if (example) return;
+    const controller = new AbortController();
+    const timeout = AbortSignal.timeout(30_000);
     async function loadPassport() {
       setLoading(true);
       setError("");
@@ -174,6 +187,7 @@ function PublicPassport({
       try {
         const response = await apiFetch(
           `/api/public/passports/${passportId}`,
+          { signal: AbortSignal.any([controller.signal, timeout]) },
         );
 
         if (!response.ok) {
@@ -189,31 +203,35 @@ function PublicPassport({
 
         setPassport(data);
       } catch (requestError) {
+        if (controller.signal.aborted) return;
         setError(
-          requestError instanceof Error
+          timeout.aborted ? "O servidor ainda está iniciando." : requestError instanceof Error
             ? requestError.message
             : "Não foi possível consultar o passaporte.",
         );
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
 
     void loadPassport();
-  }, [passportId]);
+    return () => controller.abort();
+  }, [passportId, example, attempt]);
 
   async function copyPublicLink() {
     try {
       await navigator.clipboard.writeText(
-        window.location.href,
+        getPassportShareUrl(),
       );
 
+      setShowShareLink(false);
       setCopied(true);
 
       window.setTimeout(() => {
         setCopied(false);
       }, 2000);
     } catch {
+      setShowShareLink(true);
       setCopied(false);
     }
   }
@@ -227,8 +245,9 @@ function PublicPassport({
           <h1>Consultando passaporte</h1>
 
           <p>
-            Verificando os registros do lote...
+            Buscando os registros. O servidor pode levar alguns segundos para responder.
           </p>
+          <a href={demoPath}>Ver exemplo enquanto isso</a>
         </div>
       </main>
     );
@@ -249,13 +268,25 @@ function PublicPassport({
               "Documento não encontrado."}
           </p>
 
-          <a href="/">Voltar ao TracePass</a>
+          <div className="passport-recovery">
+            <button className="secondary-button" type="button" onClick={() => {
+              setError("");
+              setLoading(true);
+              setAttempt((current) => current + 1);
+            }}>Tentar novamente</button>
+            <a href={demoPath}>Ver exemplo</a>
+          </div>
         </div>
       </main>
     );
   }
 
   const { batch, movements } = passport;
+  const today = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date());
+  const expired = batch.status === "EXPIRED"
+    || (batch.expirationDate !== null && batch.expirationDate < today);
 
   const lastMovement =
     movements.length > 0
@@ -268,10 +299,10 @@ function PublicPassport({
       .toUpperCase() ?? "?";
 
   return (
-    <main className="public-passport">
+    <main className="public-passport passport-redesign">
       <header className="passport-header">
-        <a className="passport-brand" href="/">
-          <span>TP</span>
+        <a className="passport-brand" href={workspace ? demoWorkspacePath : "/"}>
+          <span aria-hidden="true">TP</span>
 
           <div>
             <strong>TracePass</strong>
@@ -283,6 +314,9 @@ function PublicPassport({
         </a>
 
         <div className="passport-header__actions">
+          {(example || workspace) && (
+            <a className="passport-test-link" href={demoWorkspacePath}>← Voltar ao teste</a>
+          )}
           <button
             type="button"
             onClick={() =>
@@ -296,109 +330,182 @@ function PublicPassport({
 
           <span className="passport-verified">
             <i />
-            Documento verificado
+            {workspace ? "Dados neste navegador" : example ? "Dados de exemplo" : "Registro público"}
           </span>
         </div>
       </header>
 
-      <section className="passport-hero">
-        <div className="passport-hero__content">
-          <p>
-            PASSAPORTE DIGITAL VERIFICADO
-          </p>
-
-          <h1>{batch.productName}</h1>
-
-          <span>
-            Histórico público e rastreável da
-            origem ao destino.
-          </span>
-
-          <div className="passport-hero__identifiers">
-            <div>
-              <small>LOTE</small>
-              <strong>
-                {batch.batchCode}
-              </strong>
-            </div>
-
-            <div>
-              <small>SKU</small>
-              <strong>
-                {batch.productSku}
-              </strong>
-            </div>
-
-            <div>
-              <small>EMPRESA</small>
-              <strong>
-                {batch.companyName}
-              </strong>
-            </div>
-          </div>
+      {showShareLink && (
+        <div className="passport-share-fallback">
+          <label htmlFor="passport-public-url">Copie o endereço do passaporte</label>
+          <input id="passport-public-url" readOnly value={getPassportShareUrl()}
+            onFocus={(event) => event.currentTarget.select()} />
+          <button className="secondary-button" type="button" onClick={() => setShowShareLink(false)}>Fechar</button>
         </div>
-
-        <div className="passport-seal">
-          <div className="passport-seal__circle">
-            <span>✓</span>
-          </div>
-
-          <strong>
-            Autenticidade confirmada
-          </strong>
-
-          <small>
-            Registros íntegros no TracePass
-          </small>
+      )}
+      <section className="passport-overview" aria-labelledby="passport-title">
+        <div className="passport-overview__identity">
+          <p className="passport-overview__eyebrow">Passaporte digital do produto</p>
+          <h1 id="passport-title">{batch.productName}</h1>
+          <dl className="passport-overview__identifiers">
+            <div><dt>Lote</dt><dd><code>{batch.batchCode}</code></dd></div>
+            <div><dt>SKU</dt><dd><code>{batch.productSku}</code></dd></div>
+            <div><dt>Empresa</dt><dd>{batch.companyName}</dd></div>
+          </dl>
         </div>
-      </section>
-
-      <section className="passport-summary">
-        <article>
-          <span>Status atual</span>
-
-          <strong
-            className={`passport-status passport-status--${batch.status.toLowerCase()}`}
-          >
+        <aside className="passport-overview__status" aria-label="Situação do lote">
+          <span>Status operacional</span>
+          <strong className={"passport-status passport-status--" + batch.status.toLowerCase()}>
             {batchStatusLabels[batch.status]}
           </strong>
-        </article>
-
-        <article>
-          <span>Fabricação</span>
-
-          <strong>
-            {formatDate(
-              batch.manufactureDate,
-            )}
-          </strong>
-        </article>
-
-        <article>
-          <span>Validade</span>
-
-          <strong>
-            {formatDate(
-              batch.expirationDate,
-            )}
-          </strong>
-        </article>
-
-        <article>
-          <span>Quantidade</span>
-
-          <strong>
-            {formatQuantity(
-              batch.currentQuantity,
-            )}{" "}
-            {batch.productUnit === "UNIT"
-              ? "unidades"
-              : batch.productUnit}
-          </strong>
-        </article>
+          <div>
+            <span>Último local registrado</span>
+            <strong>{lastMovement?.locationName ?? "Localização não informada"}</strong>
+            {lastMovement && <time dateTime={lastMovement.occurredAt}>{formatDateTime(lastMovement.occurredAt)}</time>}
+          </div>
+        </aside>
+        <dl className="passport-overview__facts">
+          <div><dt>Origem</dt><dd>{batch.supplierName ?? "Não informada"}</dd></div>
+          <div><dt>Fabricação</dt><dd>{formatDate(batch.manufactureDate)}</dd></div>
+          <div><dt>Validade</dt><dd>{formatDate(batch.expirationDate)} {expired && <span className="passport-expired">Vencido</span>}</dd></div>
+          <div><dt>Quantidade atual</dt><dd>{formatQuantity(batch.currentQuantity)} {batch.productUnit === "UNIT" ? "unidades" : batch.productUnit}</dd></div>
+        </dl>
       </section>
 
-      <section
+      {example && (
+        <aside className="passport-demo-note">
+          <span aria-hidden="true">↳</span>
+          <div><strong>O que aconteceu com este lote?</strong>
+            <p>Uma avaria na embalagem acionou um bloqueio preventivo. Veja na jornada como o lote foi inspecionado e liberado.</p>
+          </div>
+          <a href="#ocorrencias">Ver ocorrência <span aria-hidden="true">→</span></a>
+        </aside>
+      )}
+
+      <nav className="passport-section-nav" aria-label="Seções do passaporte">
+        <a href="#jornada">Jornada <span>{movements.length}</span></a>
+        <a href="#origem">Procedência</a>
+        <a href="#ocorrencias">Ocorrências <span>{passport.safety.totalIncidents}</span></a>
+        <a href="#compartilhar">Compartilhar</a>
+      </nav>
+
+      <div className="passport-route-layout" id="jornada">
+      <section className="passport-journey">
+        <div className="passport-section-heading">
+          <div>
+            <h2>Jornada do lote</h2>
+          </div>
+
+          <span>
+            Abra os detalhes para consultar o registro ou destaque o local no mapa.
+          </span>
+        </div>
+
+        {movements.length === 0 && <p>Nenhuma movimentação registrada.</p>}
+        <div className="passport-timeline">
+          {movements.map(
+            (movement, index) => (
+              <article
+                className={"passport-event" + (selectedEvent === movement.id ? " passport-event--selected" : "")}
+                key={movement.id}
+              >
+                <div className="passport-event__marker">
+                  <span>{index + 1}</span>
+                </div>
+
+                <div className="passport-event__content">
+                  <div className="passport-event__top">
+                    <span>
+                      {
+                        movementLabels[
+                          movement.movementType
+                        ]
+                      }
+                    </span>
+
+                    <time dateTime={movement.occurredAt}>
+                      {formatDateTime(
+                        movement.occurredAt,
+                      )}
+                    </time>
+                  </div>
+
+                  <h3>{movement.title}</h3>
+                  {movement.latitude !== null && movement.longitude !== null
+                    && Math.abs(movement.latitude) <= 90 && Math.abs(movement.longitude) <= 180 && (
+                    <button className="route-select" type="button" aria-controls="mapa-da-jornada" aria-pressed={selectedEvent === movement.id}
+                      onClick={() => {
+                        setSelectedEvent(movement.id);
+                        requestAnimationFrame(() => {
+                          const map = document.getElementById("mapa-da-jornada");
+                          const bounds = map?.getBoundingClientRect();
+                          if (bounds && (bounds.top < 0 || bounds.bottom > window.innerHeight - 12)) {
+                            map?.scrollIntoView({ block: "start" });
+                          }
+                        });
+                      }}>Destacar no mapa</button>
+                  )}
+
+                  <details className="passport-event__details">
+                    <summary>Detalhes do evento</summary>
+                  {movement.description && (
+                    <p>
+                      {movement.description}
+                    </p>
+                  )}
+
+                  <div className="passport-event__metadata">
+                    {movement.locationName && (
+                      <span>
+                        Local
+
+                        <strong>
+                          {
+                            movement.locationName
+                          }
+                        </strong>
+                      </span>
+                    )}
+
+                    {movement.responsibleName && (
+                      <span>
+                        Responsável
+
+                        <strong>
+                          {
+                            movement.responsibleName
+                          }
+                        </strong>
+                      </span>
+                    )}
+
+                    {movement.quantity !==
+                      null && (
+                      <span>
+                        Quantidade
+
+                        <strong>
+                          {formatQuantity(
+                            movement.quantity,
+                          )}
+                        </strong>
+                      </span>
+                    )}
+                  </div>
+                  </details>
+                </div>
+              </article>
+            ),
+          )}
+        </div>
+      </section>
+
+      <div id="mapa-da-jornada">
+        <JourneyMap movements={movements} selectedMovementId={selectedEvent} onSelectMovement={setSelectedEvent} />
+      </div>
+      </div>
+
+      <section id="origem"
         className={`passport-origin ${
           batch.supplierId
             ? ""
@@ -413,8 +520,7 @@ function PublicPassport({
           </h2>
 
           <span>
-            Consulte a empresa fornecedora
-            associada à produção deste lote.
+            Veja o fornecedor associado ao lote e a localização que consta no registro.
           </span>
         </div>
 
@@ -464,9 +570,7 @@ function PublicPassport({
               <span>✓</span>
 
               <div>
-                <strong>
-                  Vínculo de origem confirmado
-                </strong>
+                <strong>Fornecedor vinculado ao lote</strong>
 
                 <small>
                   Fornecedor associado aos
@@ -494,141 +598,16 @@ function PublicPassport({
         )}
       </section>
       
-      <PassportSafetyPanel
-        safety={passport.safety}
-        batchCode={batch.batchCode}
-      />
+      <div id="ocorrencias">
+        <PassportSafetyPanel safety={passport.safety} batchCode={batch.batchCode} />
+      </div>
 
-      <section className="passport-current-location">
-        <div>
-          <p>ÚLTIMA ATUALIZAÇÃO</p>
 
-          <h2>
-            {lastMovement?.locationName ??
-              "Localização não informada"}
-          </h2>
 
-          {lastMovement && (
-            <span>
-              {
-                movementLabels[
-                  lastMovement.movementType
-                ]
-              }{" "}
-              em{" "}
-              {formatDateTime(
-                lastMovement.occurredAt,
-              )}
-            </span>
-          )}
-        </div>
-
-        <strong>
-          {movements.length} eventos verificados
-        </strong>
-      </section>
-
-      <section className="passport-journey">
-        <div className="passport-section-heading">
-          <div>
-            <p>HISTÓRICO DO PRODUTO</p>
-            <h2>Jornada verificada</h2>
-          </div>
-
-          <span>
-            Os registros são apresentados em
-            ordem cronológica.
-          </span>
-        </div>
-
-        <div className="passport-timeline">
-          {movements.map(
-            (movement, index) => (
-              <article
-                className="passport-event"
-                key={movement.id}
-              >
-                <div className="passport-event__marker">
-                  <span>{index + 1}</span>
-                </div>
-
-                <div className="passport-event__content">
-                  <div className="passport-event__top">
-                    <span>
-                      {
-                        movementLabels[
-                          movement.movementType
-                        ]
-                      }
-                    </span>
-
-                    <time>
-                      {formatDateTime(
-                        movement.occurredAt,
-                      )}
-                    </time>
-                  </div>
-
-                  <h3>{movement.title}</h3>
-
-                  {movement.description && (
-                    <p>
-                      {movement.description}
-                    </p>
-                  )}
-
-                  <div className="passport-event__metadata">
-                    {movement.locationName && (
-                      <span>
-                        Local
-
-                        <strong>
-                          {
-                            movement.locationName
-                          }
-                        </strong>
-                      </span>
-                    )}
-
-                    {movement.responsibleName && (
-                      <span>
-                        Responsável
-
-                        <strong>
-                          {
-                            movement.responsibleName
-                          }
-                        </strong>
-                      </span>
-                    )}
-
-                    {movement.quantity !==
-                      null && (
-                      <span>
-                        Quantidade
-
-                        <strong>
-                          {formatQuantity(
-                            movement.quantity,
-                          )}
-                        </strong>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </article>
-            ),
-          )}
-        </div>
-      </section>
-
-      <JourneyMap movements={movements} />
-
-      <PassportQrCode
-        passportId={passport.passportId}
-        productName={batch.productName}
-        batchCode={batch.batchCode}
-      />
+      <div id="compartilhar">
+        <PassportQrCode passportId={passport.passportId} productName={batch.productName}
+          batchCode={batch.batchCode} example={Boolean(example)} workspace={workspace} />
+      </div>
 
       <footer className="passport-footer">
         <div>
@@ -649,7 +628,7 @@ function PublicPassport({
         </div>
 
         <small>
-          Consultado em{" "}
+          {example ? "Cenário preparado em " : "Consultado em "}
           {formatDateTime(
             passport.generatedAt,
           )}

@@ -70,6 +70,7 @@ type MovementForm = {
 
 type MovementTimelineProps = {
   companies: CompanyOption[];
+  initialBatch?: { id: string; companyId: string; productId: string };
 };
 
 const movementLabels: Record<MovementType, string> = {
@@ -110,10 +111,13 @@ function createInitialForm(): MovementForm {
 
 function MovementTimeline({
   companies,
+  initialBatch,
 }: MovementTimelineProps) {
-  const [selectedCompanyId, setSelectedCompanyId] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState("");
-  const [selectedBatchId, setSelectedBatchId] = useState("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState(initialBatch?.companyId ?? "");
+  const [selectedProductId, setSelectedProductId] = useState(initialBatch?.productId ?? "");
+  const [selectedBatchId, setSelectedBatchId] = useState(initialBatch?.id ?? "");
+  const [productsReady, setProductsReady] = useState(false);
+  const [batchesReady, setBatchesReady] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -159,7 +163,9 @@ function MovementTimeline({
 
       const data: Product[] = await response.json();
       setProducts(data);
+      setProductsReady(true);
     } catch {
+      setProductsReady(true);
       setProducts([]);
       setMessageType("error");
       setMessage("Não foi possível carregar os produtos.");
@@ -171,6 +177,7 @@ function MovementTimeline({
   }, [loadProducts]);
 
   useEffect(() => {
+    if (!productsReady) return;
     if (products.length === 0) {
       setSelectedProductId("");
       setBatches([]);
@@ -184,7 +191,7 @@ function MovementTimeline({
     if (!productExists) {
       setSelectedProductId(products[0].id);
     }
-  }, [products, selectedProductId]);
+  }, [products, productsReady, selectedProductId]);
 
   const loadBatches = useCallback(async () => {
     if (!selectedCompanyId || !selectedProductId) {
@@ -203,7 +210,9 @@ function MovementTimeline({
 
       const data: Batch[] = await response.json();
       setBatches(data);
+      setBatchesReady(true);
     } catch {
+      setBatchesReady(true);
       setBatches([]);
       setMessageType("error");
       setMessage("Não foi possível carregar os lotes.");
@@ -215,6 +224,7 @@ function MovementTimeline({
   }, [loadBatches]);
 
   useEffect(() => {
+    if (!batchesReady) return;
     if (batches.length === 0) {
       setSelectedBatchId("");
       setMovements([]);
@@ -228,7 +238,7 @@ function MovementTimeline({
     if (!batchExists) {
       setSelectedBatchId(batches[0].id);
     }
-  }, [batches, selectedBatchId]);
+  }, [batches, batchesReady, selectedBatchId]);
 
   const loadMovements = useCallback(async () => {
     if (

@@ -5,16 +5,46 @@ import {
   type FormEvent,
 } from "react";
 import "./App.css";
+import "./experience.css";
+import { demoWorkspacePath, isDemoWorkspacePath } from "./services/demoWorkspace";
+import { demoPassport, demoPath } from "./demoPassport";
 import ProductPanel from "./components/ProductPanel";
+import BatchOverview, { type BatchSelection } from "./components/BatchOverview";
+import routeConcept from "./assets/tracepass-route-illustration.webp";
 import BatchPanel from "./components/BatchPanel";
 import MovementTimeline from "./components/MovementTimeline";
 import PublicPassport from "./components/PublicPassport";
 import SupplierPanel from "./components/SupplierPanel";
 import IncidentPanel from "./components/IncidentPanel";
-import { apiFetch } from "./services/api";
+import { apiFetch, setAdminToken } from "./services/api";
 
-type ApiStatus = "checking" | "online" | "offline";
+const previewStops = [
+  { title: "Origem", description: "Registro da saída" },
+  { title: "Transferência", description: "Passagem pelo centro logístico" },
+  { title: "Chegada", description: "Recebimento no destino" },
+];
+
 type View = "landing" | "dashboard";
+const workflowSteps = ["Empresas", "Produtos", "Fornecedores", "Lotes", "Movimentações"] as const;
+type Area = typeof workflowSteps[number] | "Ocorrências";
+
+const areaHelp: Record<Area, string> = {
+  Empresas: "Use uma empresa existente ou cadastre a organização responsável pela operação. Selecione a mesma empresa nos cadastros de produtos, fornecedores e lotes para vincular os registros.",
+  Produtos: "Cadastre o nome, o SKU e a unidade de medida. O SKU identifica o produto no catálogo e pode ser usado em vários lotes. Você pode cadastrar produtos e fornecedores em qualquer ordem.",
+  Fornecedores: "Cadastre a empresa que fornece o produto. Ao criar o lote, selecione o fornecedor daquela remessa para que a origem apareça no passaporte. Se já estiver cadastrado, siga para Lotes.",
+  Lotes: "Selecione o produto e o fornecedor da mesma empresa. Informe o código do lote, a data de fabricação e a quantidade inicial. Depois de salvar, use Ver passaporte para consultar a ficha pública ou abra a jornada para registrar movimentações.",
+  Movimentações: "Registre cada evento conforme ele acontecer, como armazenamento, expedição ou recebimento. Selecione o lote, informe quando e onde aconteceu e marque o ponto no mapa quando houver coordenadas. Você pode voltar a esta etapa sempre que houver um novo evento.",
+  Ocorrências: "Abra esta área quando precisar consultar ou registrar um desvio, como avaria ou falha de qualidade. Selecione o lote, informe o que houve e registre a resolução após o tratamento. A gravidade alta ou crítica pode acionar bloqueio automático.",
+};
+
+const areaGoals: Record<Area, string> = {
+  Empresas: "Defina quem opera",
+  Produtos: "Identifique o que será rastreado",
+  Fornecedores: "Registre de onde vem",
+  Lotes: "Vincule produto e fornecedor",
+  Movimentações: "Registre o caminho do lote",
+  Ocorrências: "Trate desvios e libere o lote",
+};
 type CompanyStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
 type Company = {
@@ -52,15 +82,18 @@ const statusLabels: Record<CompanyStatus, string> = {
 
 function getPassportIdFromPath() {
   const match = window.location.pathname.match(
-    /^\/passport\/([0-9a-f-]{36})\/?$/i,
+    /^(?:\/laboratorio)?\/passport\/([0-9a-f-]{36})\/?$/i,
   );
 
   return match?.[1] ?? null;
 }
 
 function App() {
-  const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
-  const [view, setView] = useState<View>("landing");
+  const isWorkshop = window.location.pathname.replace(/\/$/, "") === demoWorkspacePath;
+  const [view, setView] = useState<View>(isWorkshop ? "dashboard" : "landing");
+  const [area, setArea] = useState<Area>(isWorkshop ? "Empresas" : "Lotes");
+  const [batchRevision, setBatchRevision] = useState(0);
+  const [selectedBatch, setSelectedBatch] = useState<BatchSelection>();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loadingCompanies, setLoadingCompanies] = useState(false);
   const [companiesError, setCompaniesError] = useState("");
@@ -68,22 +101,9 @@ function App() {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-  useEffect(() => {
-    apiFetch("/actuator/health")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Falha ao consultar a API");
-        }
-
-        return response.json();
-      })
-      .then((data) => {
-        setApiStatus(data.status === "UP" ? "online" : "offline");
-      })
-      .catch(() => {
-        setApiStatus("offline");
-      });
-  }, []);
+  const [adminAccessOpen, setAdminAccessOpen] = useState(false);
+  const [adminError, setAdminError] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
 
   const loadCompanies = useCallback(async () => {
     setLoadingCompanies(true);
@@ -108,10 +128,52 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (view === "dashboard") {
-      void loadCompanies();
+    if (isWorkshop) void loadCompanies();
+  }, [isWorkshop, loadCompanies]);
+
+  async function handleAdminAccess(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const accessForm = event.currentTarget;
+    const token = String(new FormData(accessForm).get("adminToken") ?? "").trim();
+    if (!token || signingIn) return;
+
+    setSigningIn(true);
+    setAdminError("");
+    setAdminToken(token);
+    try {
+      const response = await apiFetch("/api/companies", {
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (response.status === 401) {
+        throw new Error("Chave inválida ou acesso administrativo indisponível.");
+      }
+      const data: unknown = response.ok ? await response.json() : null;
+      if (!Array.isArray(data)) {
+        throw new Error("Não foi possível verificar o acesso. O servidor pode estar iniciando.");
+      }
+      setCompanies(data);
+      accessForm.reset();
+      setAdminAccessOpen(false);
+      setView("dashboard");
+    } catch (error) {
+      setAdminToken("");
+      setAdminError(error instanceof DOMException && error.name === "TimeoutError"
+        ? "O servidor está demorando. Tente novamente em instantes."
+        : error instanceof Error ? error.message : "Falha ao acessar o painel.");
+    } finally {
+      setSigningIn(false);
     }
-  }, [view, loadCompanies]);
+  }
+
+  function leaveDashboard() {
+    setAdminToken("");
+    setCompanies([]);
+    setForm(initialForm);
+    setFeedback(null);
+    setSelectedBatch(undefined);
+    setArea("Lotes");
+    setView("landing");
+  }
 
   async function handleCreateCompany(
     event: FormEvent<HTMLFormElement>,
@@ -176,12 +238,6 @@ function App() {
     }).format(new Date(date));
   }
 
-  const statusText: Record<ApiStatus, string> = {
-    checking: "Verificando API...",
-    online: "API conectada",
-    offline: "API desconectada",
-  };
-
   const activeCompanies = companies.filter(
     (company) => company.status === "ACTIVE",
   ).length;
@@ -190,84 +246,160 @@ function App() {
     (company) => company.status !== "ACTIVE",
   ).length;
 
+  if (window.location.pathname.replace(/\/$/, "") === demoPath) {
+    return <PublicPassport passportId={demoPassport.passportId} example={demoPassport} />;
+  }
+
+  const isIncidentArea = area === "Ocorrências";
+  const step = isIncidentArea ? -1 : workflowSteps.indexOf(area);
+  const previousArea = step > 0 ? workflowSteps[step - 1] : undefined;
+  const nextArea = step >= 0 ? workflowSteps[step + 1] : undefined;
+
+  function goToArea(target: Area) {
+    setSelectedBatch(undefined);
+    setArea(target);
+  }
+
   const passportId = getPassportIdFromPath();
 
   if (passportId) {
-    return <PublicPassport passportId={passportId} />;
+    return <PublicPassport passportId={passportId} workspace={isDemoWorkspacePath()} />;
   }
 
   return (
     <main className={`app ${view === "dashboard" ? "app--dashboard" : ""}`}>
       <header className="header">
         <div className="brand">
-          <div className="brand__symbol">TP</div>
+          <span className="brand__symbol" aria-hidden="true">TP</span>
 
           <div>
-            <h1>TracePass</h1>
-            <p>Rastreabilidade e passaporte digital</p>
+            <strong className="brand__name">TracePass</strong>
           </div>
         </div>
 
         <div className="header__actions">
-          {view === "dashboard" && (
+          {isWorkshop ? <a className="secondary-button" href="/">Voltar ao TracePass</a> : view === "dashboard" && (
             <button
               className="secondary-button"
               type="button"
-              onClick={() => setView("landing")}
+              onClick={leaveDashboard}
             >
-              Voltar à apresentação
+              Sair do painel
             </button>
           )}
 
-          <div className={`status status--${apiStatus}`}>
-            <span className="status__dot" />
-            {statusText[apiStatus]}
-          </div>
+          {view === "landing" && (
+            <button className="secondary-button" type="button" aria-expanded={adminAccessOpen}
+              aria-controls={adminAccessOpen ? "admin-access" : undefined} disabled={signingIn}
+              onClick={() => { setAdminError(""); setAdminAccessOpen(!adminAccessOpen); }}>
+              Acesso administrativo
+            </button>
+          )}
         </div>
       </header>
 
       {view === "landing" ? (
         <>
-          <section className="hero">
-            <p className="hero__label">CONTROLE DE PONTA A PONTA</p>
-
-            <h2>Acompanhe toda a jornada de um produto.</h2>
-
-            <p className="hero__description">
-              Registre produtos, lotes, fornecedores e movimentações em uma
-              linha do tempo confiável e transparente.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setView("dashboard")}
-            >
-              Iniciar demonstração
-            </button>
+            {adminAccessOpen && (
+              <form id="admin-access" className="hero__admin-form" onSubmit={handleAdminAccess}>
+                <label htmlFor="admin-token">Chave administrativa</label>
+                <input id="admin-token" name="adminToken" type="password" autoComplete="off" required />
+                <button className="secondary-button" type="submit" disabled={signingIn}>
+                  {signingIn ? "Conectando ao servidor…" : "Entrar"}
+                </button>
+                {adminError && <p role="alert">{adminError}</p>}
+              </form>
+            )}
+          <section className="product-intro">
+            <div className="product-intro__copy">
+              <span className="product-intro__category">Rastreabilidade de produtos</span>
+              <h1>Do início ao destino</h1>
+              <p>Por onde seu produto passou antes de chegar até você? O TracePass reúne esse caminho em um passaporte digital.</p>
+              <div className="landing-demo-actions">
+                <a className="hero__demo-link" href={demoWorkspacePath}>Testar o TracePass <span aria-hidden="true">↗</span></a>
+                <a className="landing-passport-link" href={demoPath}>Ver Passaporte</a>
+              </div>
+            </div>
+            <article className="demo-preview" aria-label="Cenário ilustrativo de rastreabilidade">
+              <header>
+                <div>
+                  <h2>A jornada de uma remessa</h2>
+                  <p>Da expedição ao recebimento</p>
+                </div>
+                <span className="demo-preview__badge">Cenário ilustrativo</span>
+              </header>
+              <div className="demo-preview__detail">
+                <img className="route-illustration__image" src={routeConcept}
+                  alt="Mapa ilustrativo de uma região portuária com três etapas numeradas e conectadas em carmim" />
+                <ol className="demo-preview__events" aria-label="Destaques da linha do tempo">
+                  {previewStops.map((stop, index) => (
+                    <li key={stop.title}>
+                      <span className="demo-preview__event-number" aria-hidden="true">{index + 1}</span>
+                      <div><strong>{stop.title}</strong><small>{stop.description}</small></div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </article>
           </section>
-
-          <section className="features">
-            <article>
-              <span>01</span>
-              <h3>Produtos e lotes</h3>
-              <p>Identificação individual e histórico centralizado.</p>
-            </article>
-
-            <article>
-              <span>02</span>
-              <h3>Movimentações</h3>
-              <p>Acompanhamento da origem até o destino final.</p>
-            </article>
-
-            <article>
-              <span>03</span>
-              <h3>Passaporte digital</h3>
-              <p>Consulta pública por QR Code para clientes e parceiros.</p>
-            </article>
+          <section className="landing-capabilities" aria-label="O que você pode consultar">
+            <article><span aria-hidden="true">⌖</span><div><h2>De onde veio?</h2><p>Identifique o produto e o fornecedor de origem.</p></div></article>
+            <article><span aria-hidden="true">⇄</span><div><h2>O que mudou no caminho?</h2><p>Veja as movimentações e como cada ocorrência foi tratada.</p></div></article>
+            <article><span aria-hidden="true">▦</span><div><h2>Como consultar?</h2><p>Abra o passaporte pelo QR Code ou compartilhe o link.</p></div></article>
           </section>
         </>
       ) : (
         <section className="dashboard">
+          <header className="workspace-intro">
+            <div>
+              <h1>{isWorkshop ? "Demonstração interativa" : "Painel de rastreabilidade"}</h1>
+              <p>{isWorkshop
+                ? "Experimente o fluxo completo com dados fictícios. Os registros ficam neste navegador."
+                : "Cadastre, acompanhe e compartilhe os registros dos seus lotes."}</p>
+            </div>
+            {isWorkshop && <a className="landing-passport-link" href={demoPath}>Ver Passaporte</a>}
+          </header>
+          <section className="workspace-flow" aria-labelledby="workspace-flow-title">
+            <div className="workspace-flow__heading">
+              <h2 id="workspace-flow-title">Fluxo de rastreabilidade</h2>
+              <span>{isIncidentArea ? "Tratamento de desvios" : `Etapa ${step + 1} de ${workflowSteps.length}`}</span>
+            </div>
+            <nav aria-label="Etapas da rastreabilidade">
+              <ol className="workspace-steps">
+                {workflowSteps.map((item, index) => (
+                  <li key={item}>
+                    <button type="button" aria-current={area === item ? "step" : undefined}
+                      onClick={() => goToArea(item)}>
+                      <span className="workspace-step-number" aria-hidden="true">{index + 1}</span>
+                      <strong>{item}</strong>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+            <div className="workspace-flow__guide">
+              <div aria-live="polite"><strong>{areaGoals[area]}</strong><p>{areaHelp[area]}</p></div>
+              <div className="workspace-flow__actions">
+                {previousArea && <button className="secondary-button" type="button"
+                  onClick={() => goToArea(previousArea)}>← {previousArea}</button>}
+                {nextArea && <button className="primary-button" type="button"
+                  onClick={() => goToArea(nextArea)}>Próxima: {nextArea} →</button>}
+                {isIncidentArea && <button className="secondary-button" type="button"
+                  onClick={() => goToArea("Lotes")}>← Voltar aos lotes</button>}
+              </div>
+            </div>
+            <div className="workspace-flow__exception">
+              <p>Registre uma ocorrência se houver um desvio no lote.</p>
+              <button className="secondary-button" type="button" aria-current={isIncidentArea ? "true" : undefined}
+                onClick={() => setArea("Ocorrências")}>Ocorrências <span>Opcional</span></button>
+            </div>
+          </section>
+          {companiesError && (
+            <p role="alert">{companiesError} <button type="button" className="secondary-button"
+              onClick={() => void loadCompanies()}>Tentar novamente</button></p>
+          )}
+          {loadingCompanies && area !== "Empresas" && <p role="status">Carregando empresas…</p>}
+          {area === "Empresas" && <>
           <div className="dashboard__heading">
             <div>
               <p className="dashboard__eyebrow">PAINEL ADMINISTRATIVO</p>
@@ -302,7 +434,7 @@ function App() {
 
             <article className="metric-card">
               <span>Exigem atenção</span>
-              <strong>{attentionCompanies}</strong>
+              <strong data-metric-tone={attentionCompanies > 0 ? "attention" : undefined}>{attentionCompanies}</strong>
               <p>Inativas ou suspensas</p>
             </article>
           </section>
@@ -436,11 +568,20 @@ function App() {
             </article>
           </section>
 
-          <ProductPanel companies={companies} />
-          <SupplierPanel companies={companies} />
-          <BatchPanel companies={companies} />
-          <MovementTimeline companies={companies} />
-          <IncidentPanel companies={companies} />
+          </>}
+          {area === "Produtos" && <ProductPanel companies={companies} />}
+          {area === "Fornecedores" && <SupplierPanel companies={companies} />}
+          {area === "Lotes" && (
+            <>
+              <BatchPanel companies={companies} onCreated={() => setBatchRevision((current) => current + 1)} />
+              <BatchOverview revision={batchRevision} companies={companies} onOpenArea={(batch, target) => {
+                setSelectedBatch(batch);
+                setArea(target);
+              }} />
+            </>
+          )}
+          {area === "Movimentações" && <MovementTimeline companies={companies} initialBatch={selectedBatch} />}
+          {area === "Ocorrências" && <IncidentPanel companies={companies} initialBatch={selectedBatch} />}
         </section>
       )}
     </main>

@@ -96,6 +96,7 @@ type IncidentForm = {
 
 type IncidentPanelProps = {
   companies: CompanyOption[];
+  initialBatch?: { id: string; companyId: string; productId: string };
 };
 
 const incidentTypeLabels: Record<
@@ -158,22 +159,25 @@ function createInitialForm(): IncidentForm {
 
 function IncidentPanel({
   companies,
+  initialBatch,
 }: IncidentPanelProps) {
   const [
     selectedCompanyId,
     setSelectedCompanyId,
-  ] = useState("");
+  ] = useState(initialBatch?.companyId ?? "");
 
   const [
     selectedProductId,
     setSelectedProductId,
-  ] = useState("");
+  ] = useState(initialBatch?.productId ?? "");
 
   const [
     selectedBatchId,
     setSelectedBatchId,
-  ] = useState("");
+  ] = useState(initialBatch?.id ?? "");
 
+  const [productsReady, setProductsReady] = useState(false);
+  const [batchesReady, setBatchesReady] = useState(false);
   const [products, setProducts] =
     useState<Product[]>([]);
 
@@ -282,8 +286,10 @@ function IncidentPanel({
           await response.json();
 
         setProducts(data);
+        setProductsReady(true);
       } catch {
-        setProducts([]);
+        setProductsReady(true);
+      setProducts([]);
         setMessageType("error");
         setMessage(
           "Não foi possível carregar os produtos.",
@@ -329,6 +335,7 @@ function IncidentPanel({
   ]);
 
   useEffect(() => {
+    if (!productsReady) return;
     if (products.length === 0) {
       setSelectedProductId("");
       setSelectedBatchId("");
@@ -348,7 +355,7 @@ function IncidentPanel({
         products[0].id,
       );
     }
-  }, [products, selectedProductId]);
+  }, [products, productsReady, selectedProductId]);
 
   const loadBatches = useCallback(
     async () => {
@@ -375,8 +382,10 @@ function IncidentPanel({
           await response.json();
 
         setBatches(data);
+        setBatchesReady(true);
       } catch {
-        setBatches([]);
+        setBatchesReady(true);
+      setBatches([]);
         setMessageType("error");
         setMessage(
           "Não foi possível carregar os lotes.",
@@ -396,6 +405,7 @@ function IncidentPanel({
   }, [loadBatches]);
 
   useEffect(() => {
+    if (!batchesReady) return;
     if (batches.length === 0) {
       setSelectedBatchId("");
       setIncidents([]);
@@ -412,7 +422,7 @@ function IncidentPanel({
         batches[0].id,
       );
     }
-  }, [batches, selectedBatchId]);
+  }, [batches, batchesReady, selectedBatchId]);
 
   const loadBatchIncidents =
     useCallback(async () => {
@@ -873,13 +883,13 @@ function IncidentPanel({
 
         <article>
           <span>Exigem atenção</span>
-          <strong>{openIncidents}</strong>
+          <strong data-metric-tone={openIncidents > 0 ? "attention" : undefined}>{openIncidents}</strong>
           <p>Abertas ou em investigação</p>
         </article>
 
-        <article className="incident-metric--critical">
+        <article className={criticalIncidents > 0 ? "incident-metric--critical" : undefined}>
           <span>Alta criticidade</span>
-          <strong>
+          <strong data-metric-tone={criticalIncidents > 0 ? "urgent" : undefined}>
             {criticalIncidents}
           </strong>
           <p>Riscos altos ou críticos</p>
@@ -927,7 +937,7 @@ function IncidentPanel({
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form className="incident-entry-form" onSubmit={handleSubmit}>
             <label>
               Tipo da ocorrência
 
@@ -1062,7 +1072,7 @@ function IncidentPanel({
               />
             </label>
 
-            <label>
+            <label className="incident-entry-form__description">
               Descrição
 
               <textarea
@@ -1105,7 +1115,7 @@ function IncidentPanel({
         <article className="panel incident-list-panel">
           <div className="panel__header">
             <div>
-              <span>MONITORAMENTO ATIVO</span>
+              <span>HISTÓRICO E TRATAMENTO</span>
               <h3>Ocorrências do lote</h3>
             </div>
 

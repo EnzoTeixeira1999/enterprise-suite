@@ -115,7 +115,36 @@
   line-height: 1.7;
 }
 
-.hero button {
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero__admin-form {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 320px);
+  margin: 20px auto 0;
+  text-align: left;
+}
+
+.hero__admin-form input {
+  min-width: 0;
+  padding: 10px;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.hero__admin-form [role="alert"] {
+  margin: 0;
+}
+
+.hero__demo-link {
+  display: inline-block;
+  text-decoration: none;
   padding: 14px 22px;
   border: 0;
   border-radius: 12px;
@@ -129,7 +158,7 @@
     box-shadow 160ms ease;
 }
 
-.hero button:hover {
+.hero__demo-link:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 35px rgba(50, 205, 255, 0.25);
 }

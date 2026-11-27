@@ -1,13 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CircleMarker,
   MapContainer,
   Polyline,
   Popup,
-  TileLayer,
   Tooltip,
   useMap,
 } from "react-leaflet";
+import TraceMapBase from "./TraceMapBase";
 import type { LatLngTuple } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -25,10 +25,15 @@ type JourneyMovement = {
 
 type JourneyMapProps = {
   movements: JourneyMovement[];
+  selectedMovementId?: string;
+  onSelectMovement?: (id: string) => void;
+  compact?: boolean;
 };
 
 type MapViewportProps = {
   positions: LatLngTuple[];
+  activePosition?: LatLngTuple;
+  fitRevision: number;
 };
 
 const movementNames: Record<string, string> = {
@@ -44,7 +49,7 @@ const movementNames: Record<string, string> = {
   COMPLETION: "Conclusão",
 };
 
-function MapViewport({ positions }: MapViewportProps) {
+function MapViewport({ positions, activePosition, fitRevision }: MapViewportProps) {
   const map = useMap();
 
   useEffect(() => {
@@ -59,7 +64,11 @@ function MapViewport({ positions }: MapViewportProps) {
         maxZoom: 13,
       });
     }
-  }, [map, positions]);
+  }, [map, positions, fitRevision]);
+
+  useEffect(() => {
+    if (activePosition) map.panTo(activePosition, { animate: false });
+  }, [map, activePosition]);
 
   return null;
 }
@@ -71,8 +80,9 @@ function formatDateTime(date: string) {
   }).format(new Date(date));
 }
 
-function JourneyMap({ movements }: JourneyMapProps) {
-  const mappedMovements = movements
+function JourneyMap({ movements, selectedMovementId, onSelectMovement, compact = false }: JourneyMapProps) {
+  const [fitRevision, setFitRevision] = useState(0);
+  const mappedMovements = useMemo(() => movements
     .filter(
       (
         movement,
@@ -82,26 +92,29 @@ function JourneyMap({ movements }: JourneyMapProps) {
       } =>
         movement.latitude !== null &&
         movement.longitude !== null &&
-        Number.isFinite(movement.latitude) &&
-        Number.isFinite(movement.longitude),
+        Number.isFinite(movement.latitude) && Math.abs(movement.latitude) <= 90 &&
+        Number.isFinite(movement.longitude) && Math.abs(movement.longitude) <= 180,
     )
     .sort(
       (first, second) =>
         new Date(first.occurredAt).getTime() -
         new Date(second.occurredAt).getTime(),
-    );
+    ), [movements]);
 
-  const positions: LatLngTuple[] = mappedMovements.map(
+  const positions = useMemo<LatLngTuple[]>(() => mappedMovements.map(
     (movement) => [movement.latitude, movement.longitude],
-  );
+  ), [mappedMovements]);
+
+  const selectedIndex = mappedMovements.findIndex((movement) => movement.id === selectedMovementId);
+  const selectedMovement = mappedMovements[selectedIndex];
 
   if (mappedMovements.length === 0) {
     return (
       <section className="journey-map-panel">
         <div className="journey-map-panel__heading">
           <div>
-            <span>ROTA GEOGRÁFICA</span>
-            <h3>Mapa da jornada</h3>
+            <span>LOCALIZAÇÕES DO LOTE</span>
+            <h3>Trajeto registrado</h3>
           </div>
         </div>
 
@@ -117,43 +130,73 @@ function JourneyMap({ movements }: JourneyMapProps) {
   }
 
   return (
-    <section className="journey-map-panel">
+    <section className={compact ? "journey-map-panel journey-map-panel--compact" : "journey-map-panel"}>
       <div className="journey-map-panel__heading">
         <div>
-          <span>ROTA GEOGRÁFICA</span>
-          <h3>Mapa da jornada</h3>
+          {!compact && <span>LOCALIZAÇÕES DO LOTE</span>}
+          <h3>Trajeto registrado</h3>
         </div>
 
-        <strong>{mappedMovements.length} pontos</strong>
+        {!compact && <strong>{mappedMovements.length} pontos</strong>}
       </div>
 
+      {!compact && <p className="journey-map-caption">Os pontos indicam locais registrados. A linha pontilhada mostra a ordem dos eventos.</p>}
+      {onSelectMovement && (
+        <div className="journey-map-toolbar">
+          <label>Evento no mapa
+            <select value={selectedMovementId ?? ""} onChange={(event) => {
+              const id = event.target.value;
+              onSelectMovement(id);
+              if (!id) setFitRevision((current) => current + 1);
+            }}>
+              <option value="">Todos os pontos</option>
+              {mappedMovements.map((movement) => <option key={movement.id} value={movement.id}>{movement.title}</option>)}
+            </select>
+          </label>
+          <button className="route-select" type="button" onClick={() => {
+            onSelectMovement("");
+            setFitRevision((current) => current + 1);
+          }}>Enquadrar rota</button>
+        </div>
+      )}
+      {selectedMovement && (
+        <div className="journey-map-selection" aria-live="polite">
+          <strong>{selectedMovement.title}</strong>
+          <span>{selectedMovement.locationName ?? "Local sem nome"} · {formatDateTime(selectedMovement.occurredAt)}</span>
+        </div>
+      )}
       <div className="journey-map">
         <MapContainer
           center={positions[0]}
           zoom={13}
-          scrollWheelZoom
+          scrollWheelZoom={false}
+          zoomControl={!compact}
+          preferCanvas
+          dragging={!compact}
+          doubleClickZoom={!compact}
+          touchZoom={!compact}
           className="journey-map__container"
         >
-          <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          <MapViewport positions={positions} />
+          <TraceMapBase />
+          <MapViewport positions={positions} activePosition={positions[selectedIndex]} fitRevision={fitRevision} />
 
           {positions.length > 1 && (
+            <>
+            <Polyline positions={positions} interactive={false}
+              pathOptions={{ color: "#171419", weight: 7, opacity: .8 }} />
             <Polyline
               positions={positions}
               pathOptions={{
-                color: "#56ddff",
+                color: "#e03e62",
                 weight: 4,
                 opacity: 0.8,
-                dashArray: "10 8",
+                dashArray: "9 7",
               }}
             />
+            </>
           )}
 
-          {mappedMovements.map((movement, index) => {
+          {mappedMovements.map((movement) => {
             const position: LatLngTuple = [
               movement.latitude,
               movement.longitude,
@@ -163,10 +206,11 @@ function JourneyMap({ movements }: JourneyMapProps) {
               <CircleMarker
                 key={movement.id}
                 center={position}
-                radius={10}
+                eventHandlers={onSelectMovement ? { click: () => onSelectMovement(movement.id) } : undefined}
+                radius={selectedMovementId === movement.id ? 14 : 8}
                 pathOptions={{
-                  color: "#071521",
-                  fillColor: "#52f2bf",
+                  color: "#171419",
+                  fillColor: selectedMovementId === movement.id ? "#f46483" : "#b92148",
                   fillOpacity: 1,
                   weight: 4,
                 }}
@@ -175,8 +219,9 @@ function JourneyMap({ movements }: JourneyMapProps) {
                   permanent
                   direction="top"
                   offset={[0, -8]}
+                  className={selectedMovementId === movement.id ? "journey-point-label journey-point-label--selected" : "journey-point-label"}
                 >
-                  {index + 1}
+                  {movements.findIndex((entry) => entry.id === movement.id) + 1}
                 </Tooltip>
 
                 <Popup>

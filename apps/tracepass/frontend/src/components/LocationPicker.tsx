@@ -1,13 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   CircleMarker,
   MapContainer,
   Polyline,
-  TileLayer,
   Tooltip,
   useMap,
   useMapEvents,
 } from "react-leaflet";
+import TraceMapBase from "./TraceMapBase";
 import type { LatLngTuple } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -119,14 +119,15 @@ function LocationPicker({
   origin = null,
   onSelect,
 }: LocationPickerProps) {
-  const originPosition = getPosition(
-    origin?.latitude,
-    origin?.longitude,
+  const originLatitude = origin?.latitude;
+  const originLongitude = origin?.longitude;
+  const originPosition = useMemo(
+    () => getPosition(originLatitude, originLongitude),
+    [originLatitude, originLongitude],
   );
-
-  const selectedPosition = getPosition(
-    latitude,
-    longitude,
+  const selectedPosition = useMemo(
+    () => getPosition(latitude, longitude),
+    [latitude, longitude],
   );
 
   return (
@@ -153,13 +154,10 @@ function LocationPicker({
             defaultCenter
           }
           zoom={13}
-          scrollWheelZoom
+          scrollWheelZoom={false}
           className="location-picker__container"
         >
-          <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
-            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+          <TraceMapBase />
 
           <MapClickHandler onSelect={onSelect} />
 
@@ -175,7 +173,7 @@ function LocationPicker({
                 selectedPosition,
               ]}
               pathOptions={{
-                color: "#56ddff",
+                color: "#e03e62",
                 weight: 4,
                 opacity: 0.85,
                 dashArray: "9 7",
