@@ -1,5 +1,6 @@
 package dev.enzoteixeira.tracepass.company;
 
+import dev.enzoteixeira.tracepass.audit.RecordArchiveService;
 import dev.enzoteixeira.tracepass.company.dto.CompanyResponse;
 import dev.enzoteixeira.tracepass.company.dto.CreateCompanyRequest;
 import dev.enzoteixeira.tracepass.company.dto.UpdateCompanyRequest;
@@ -29,9 +30,11 @@ import java.util.UUID;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final RecordArchiveService archives;
 
-    public CompanyController(CompanyService companyService) {
+    public CompanyController(CompanyService companyService, RecordArchiveService archives) {
         this.companyService = companyService;
+        this.archives = archives;
     }
 
     @PostMapping
@@ -81,12 +84,13 @@ public class CompanyController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
-            summary = "Excluir empresa",
-            description = "Exclui permanentemente uma empresa cadastrada"
+            summary = "Arquivar empresa",
+            description = "Retira o registro da lista ativa e preserva o histórico"
     )
     public void delete(
             @PathVariable("id") UUID id
     ) {
-        companyService.delete(id);
+        companyService.findById(id);
+        archives.archive("companies", id, null);
     }
 }

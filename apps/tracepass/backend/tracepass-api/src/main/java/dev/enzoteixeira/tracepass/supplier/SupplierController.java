@@ -1,5 +1,6 @@
 package dev.enzoteixeira.tracepass.supplier;
 
+import dev.enzoteixeira.tracepass.audit.RecordArchiveService;
 import dev.enzoteixeira.tracepass.supplier.dto.CreateSupplierRequest;
 import dev.enzoteixeira.tracepass.supplier.dto.SupplierResponse;
 import dev.enzoteixeira.tracepass.supplier.dto.UpdateSupplierRequest;
@@ -31,11 +32,11 @@ import java.util.UUID;
 public class SupplierController {
 
     private final SupplierService supplierService;
+    private final RecordArchiveService archives;
 
-    public SupplierController(
-            SupplierService supplierService
-    ) {
+    public SupplierController(SupplierService supplierService, RecordArchiveService archives) {
         this.supplierService = supplierService;
+        this.archives = archives;
     }
 
     @PostMapping
@@ -104,16 +105,14 @@ public class SupplierController {
     @DeleteMapping("/{supplierId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
-            summary = "Excluir fornecedor",
-            description = "Exclui um fornecedor cadastrado na empresa"
+            summary = "Arquivar fornecedor",
+            description = "Retira o registro da lista ativa e preserva o histórico"
     )
     public void delete(
             @PathVariable UUID companyId,
             @PathVariable UUID supplierId
     ) {
-        supplierService.delete(
-                companyId,
-                supplierId
-        );
+        supplierService.findById(companyId, supplierId);
+        archives.archive("suppliers", supplierId, null);
     }
 }

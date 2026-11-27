@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface BatchRepository extends JpaRepository<Batch, UUID> {
 
-    List<Batch> findAllByProduct_IdOrderByCreatedAtDesc(
+    List<Batch> findAllByProduct_IdAndArchivedAtIsNullOrderByCreatedAtDesc(
             UUID productId
     );
 

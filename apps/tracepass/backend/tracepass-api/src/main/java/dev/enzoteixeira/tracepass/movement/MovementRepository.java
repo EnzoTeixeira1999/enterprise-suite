@@ -13,6 +13,8 @@ public interface MovementRepository
             UUID batchId
     );
 
+    List<Movement> findAllByBatch_IdAndArchivedAtIsNullOrderByOccurredAtAsc(UUID batchId);
+
     Optional<Movement> findByIdAndBatch_Id(
             UUID movementId,
             UUID batchId

@@ -1,3 +1,4 @@
+import RecordActions from "./RecordActions";
 import {
   useCallback,
   useEffect,
@@ -627,7 +628,7 @@ function MovementTimeline({
         <article className="panel timeline-panel">
           <div className="panel__header">
             <div>
-              <span>HISTÓRICO IMUTÁVEL</span>
+              <span>HISTÓRICO AUDITÁVEL</span>
               <h3>Jornada do lote</h3>
             </div>
 
@@ -708,6 +709,9 @@ function MovementTimeline({
                         </span>
                       )}
                     </div>
+                    <RecordActions entity="movements" record={movement} name={movement.title}
+                      archiveDisabled={movement.movementType === "BLOCK" || movement.movementType === "RELEASE"}
+                      onSaved={loadMovements} />
                   </div>
                 </article>
               ))}

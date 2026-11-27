@@ -53,6 +53,7 @@ type PassportBatch = {
   status: BatchStatus;
   createdAt: string;
   updatedAt: string;
+  archivedAt?: string | null;
 };
 
 type PassportMovement = {
@@ -80,6 +81,7 @@ export type PassportData = {
   verificationStatus: string;
   batch: PassportBatch;
   movements: PassportMovement[];
+  archivedMovements?: number;
   safety: PassportSafety;
   generatedAt: string;
 };
@@ -281,7 +283,7 @@ function PublicPassport({
     );
   }
 
-  const { batch, movements } = passport;
+  const { batch, movements, archivedMovements = 0 } = passport;
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "America/Sao_Paulo",
   }).format(new Date());
@@ -372,6 +374,10 @@ function PublicPassport({
         </dl>
       </section>
 
+      {batch.archivedAt && <aside className="passport-demo-note">
+        <div><strong>Lote arquivado</strong><p>Este passaporte continua disponível para consulta histórica.</p></div>
+      </aside>}
+
       {example && (
         <aside className="passport-demo-note">
           <span aria-hidden="true">↳</span>
@@ -401,6 +407,7 @@ function PublicPassport({
           </span>
         </div>
 
+        {archivedMovements > 0 && <p>Movimentações arquivadas pela operação: {archivedMovements}.</p>}
         {movements.length === 0 && <p>Nenhuma movimentação registrada.</p>}
         <div className="passport-timeline">
           {movements.map(

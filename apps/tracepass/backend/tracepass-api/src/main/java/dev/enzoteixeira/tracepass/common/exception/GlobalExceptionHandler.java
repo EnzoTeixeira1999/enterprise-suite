@@ -45,6 +45,13 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleIntegrity(HttpServletRequest request) {
+        return createResponse(HttpStatus.CONFLICT,
+                "O registro foi arquivado, mudou ou já existe. Atualize a lista e tente novamente.",
+                request.getRequestURI());
+    }
+
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiError> handleNotFound(
             NoSuchElementException exception,

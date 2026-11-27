@@ -92,7 +92,7 @@ public class BatchService {
         findProduct(companyId, productId);
 
         return batchRepository
-                .findAllByProduct_IdOrderByCreatedAtDesc(
+                .findAllByProduct_IdAndArchivedAtIsNullOrderByCreatedAtDesc(
                         productId
                 )
                 .stream()
@@ -174,7 +174,7 @@ public class BatchService {
                 request.manufactureDate(),
                 request.expirationDate(),
                 request.currentQuantity(),
-                request.status()
+                batch.getStatus()
         );
 
         batch.changeSupplier(supplier);
@@ -183,20 +183,6 @@ public class BatchService {
                 batchRepository.saveAndFlush(batch);
 
         return BatchResponse.from(updatedBatch);
-    }
-
-    @Transactional
-    public void delete(
-            UUID companyId,
-            UUID productId,
-            UUID batchId
-    ) {
-        findProduct(companyId, productId);
-
-        Batch batch =
-                findBatch(productId, batchId);
-
-        batchRepository.delete(batch);
     }
 
     private Product findProduct(

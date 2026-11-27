@@ -81,7 +81,7 @@ public class MovementService {
         findBatch(productId, batchId);
 
         return movementRepository
-                .findAllByBatch_IdOrderByOccurredAtAsc(batchId)
+                .findAllByBatch_IdAndArchivedAtIsNullOrderByOccurredAtAsc(batchId)
                 .stream()
                 .map(MovementResponse::from)
                 .toList();

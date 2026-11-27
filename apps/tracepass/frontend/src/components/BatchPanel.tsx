@@ -1,3 +1,4 @@
+import RecordActions from "./RecordActions";
 import {
   useCallback,
   useEffect,
@@ -921,6 +922,10 @@ function BatchPanel({
                         </span>
                       </a>
                     </div>
+                    <RecordActions entity="batches" record={batch} name={batch.batchCode}
+                      editPath={`/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches/${batch.id}`}
+                      suppliers={suppliers.map((supplier) => ({ value: supplier.id, label: supplier.tradeName }))}
+                      onSaved={async () => { await loadBatches(); onCreated?.(); }} />
                   </article>
                 );
               })}

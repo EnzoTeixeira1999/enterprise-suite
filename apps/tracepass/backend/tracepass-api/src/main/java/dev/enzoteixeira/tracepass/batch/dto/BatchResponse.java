@@ -31,7 +31,8 @@ public record BatchResponse(
         BigDecimal currentQuantity,
         BatchStatus status,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+        OffsetDateTime archivedAt
 ) {
 
     public static BatchResponse from(Batch batch) {
@@ -77,7 +78,8 @@ public record BatchResponse(
                 batch.getCurrentQuantity(),
                 batch.getStatus(),
                 batch.getCreatedAt(),
-                batch.getUpdatedAt()
+                batch.getUpdatedAt(),
+                batch.getArchivedAt()
         );
     }
 }

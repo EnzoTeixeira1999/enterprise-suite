@@ -1,3 +1,5 @@
+import RecordActions from "./components/RecordActions";
+import RecordAudit from "./components/RecordAudit";
 import {
   useCallback,
   useEffect,
@@ -110,6 +112,7 @@ function getPassportIdFromPath() {
 function App() {
   const isWorkshop = window.location.pathname.replace(/\/$/, "") === demoWorkspacePath;
   const [view, setView] = useState<View>(isWorkshop ? "dashboard" : "landing");
+  const [showAudit, setShowAudit] = useState(false);
   const [area, setArea] = useState<Area>(isWorkshop ? "Empresas" : "Lotes");
   const [batchRevision, setBatchRevision] = useState(0);
   const [selectedBatch, setSelectedBatch] = useState<BatchSelection>();
@@ -186,6 +189,7 @@ function App() {
 
   function leaveDashboard() {
     setAdminToken("");
+    setShowAudit(false);
     setCompanies([]);
     setForm(initialForm);
     setFeedback(null);
@@ -297,6 +301,8 @@ function App() {
         </div>
 
         <div className="header__actions">
+          {view === "dashboard" && !showAudit && <button className="secondary-button" type="button"
+            onClick={() => setShowAudit(true)}>Histórico de alterações</button>}
           {isWorkshop ? <a className="secondary-button" href="/">Voltar ao TracePass</a> : view === "dashboard" && (
             <button
               className="secondary-button"
@@ -379,6 +385,7 @@ function App() {
         </>
       ) : (
         <section className="dashboard">
+          {showAudit ? <RecordAudit onClose={() => setShowAudit(false)} /> : <>
           <header className="workspace-intro">
             <div>
               <h1>{isWorkshop ? "Demonstração interativa" : "Painel de rastreabilidade"}</h1>
@@ -596,6 +603,8 @@ function App() {
                       >
                         {statusLabels[company.status]}
                       </span>
+                      <RecordActions entity="companies" record={company} name={company.tradeName}
+                        editPath={`/api/companies/${company.id}`} onSaved={loadCompanies} />
                     </article>
                   ))}
                 </div>
@@ -617,6 +626,7 @@ function App() {
           )}
           {area === "Movimentações" && <MovementTimeline companies={companies} initialBatch={selectedBatch} />}
           {area === "Ocorrências" && <IncidentPanel companies={companies} initialBatch={selectedBatch} />}
+          </>}
         </section>
       )}
     </main>

@@ -1,5 +1,6 @@
 package dev.enzoteixeira.tracepass.batch;
 
+import dev.enzoteixeira.tracepass.audit.RecordArchiveService;
 import dev.enzoteixeira.tracepass.batch.dto.BatchResponse;
 import dev.enzoteixeira.tracepass.batch.dto.CreateBatchRequest;
 import dev.enzoteixeira.tracepass.batch.dto.UpdateBatchRequest;
@@ -31,9 +32,11 @@ import java.util.UUID;
 public class BatchController {
 
     private final BatchService batchService;
+    private final RecordArchiveService archives;
 
-    public BatchController(BatchService batchService) {
+    public BatchController(BatchService batchService, RecordArchiveService archives) {
         this.batchService = batchService;
+        this.archives = archives;
     }
 
     @PostMapping
@@ -108,18 +111,15 @@ public class BatchController {
     @DeleteMapping("/{batchId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
-            summary = "Excluir lote",
-            description = "Exclui um lote pertencente a um produto"
+            summary = "Arquivar lote",
+            description = "Retira o registro da lista ativa e preserva o histórico"
     )
     public void delete(
             @PathVariable("companyId") UUID companyId,
             @PathVariable("productId") UUID productId,
             @PathVariable("batchId") UUID batchId
     ) {
-        batchService.delete(
-                companyId,
-                productId,
-                batchId
-        );
+        batchService.findById(companyId, productId, batchId);
+        archives.archive("batches", batchId, null);
     }
 }

@@ -67,7 +67,7 @@ public class SupplierService {
         findCompany(companyId);
 
         return supplierRepository
-                .findAllByCompany_IdOrderByTradeNameAsc(
+                .findAllByCompany_IdAndArchivedAtIsNullOrderByTradeNameAsc(
                         companyId
                 )
                 .stream()
@@ -127,17 +127,6 @@ public class SupplierService {
                 supplierRepository.saveAndFlush(supplier);
 
         return SupplierResponse.from(updatedSupplier);
-    }
-
-    @Transactional
-    public void delete(
-            UUID companyId,
-            UUID supplierId
-    ) {
-        Supplier supplier =
-                findSupplier(companyId, supplierId);
-
-        supplierRepository.delete(supplier);
     }
 
     private Company findCompany(UUID companyId) {

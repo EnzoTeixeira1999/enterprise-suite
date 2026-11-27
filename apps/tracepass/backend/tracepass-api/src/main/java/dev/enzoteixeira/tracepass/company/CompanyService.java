@@ -42,7 +42,7 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public List<CompanyResponse> findAll() {
-        return companyRepository.findAll()
+        return companyRepository.findAllByArchivedAtIsNull()
                 .stream()
                 .map(CompanyResponse::from)
                 .toList();
@@ -77,12 +77,6 @@ public class CompanyService {
         Company updatedCompany = companyRepository.saveAndFlush(company);
 
         return CompanyResponse.from(updatedCompany);
-    }
-
-    @Transactional
-    public void delete(UUID id) {
-        Company company = findEntityById(id);
-        companyRepository.delete(company);
     }
 
     private Company findEntityById(UUID id) {

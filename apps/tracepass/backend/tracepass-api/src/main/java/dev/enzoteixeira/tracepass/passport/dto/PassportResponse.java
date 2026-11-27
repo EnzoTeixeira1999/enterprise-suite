@@ -12,6 +12,7 @@ public record PassportResponse(
         String verificationStatus,
         BatchResponse batch,
         List<MovementResponse> movements,
+        int archivedMovements,
         PassportSafetyResponse safety,
         OffsetDateTime generatedAt
 ) {

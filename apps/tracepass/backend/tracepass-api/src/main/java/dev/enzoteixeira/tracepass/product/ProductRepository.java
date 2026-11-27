@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    List<Product> findAllByCompany_IdOrderByCreatedAtDesc(
+    List<Product> findAllByCompany_IdAndArchivedAtIsNullOrderByCreatedAtDesc(
             UUID companyId
     );
 
