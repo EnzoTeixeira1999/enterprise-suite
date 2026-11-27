@@ -89,6 +89,7 @@ export type PassportData = {
 type PublicPassportProps = {
   passportId: string;
   example?: PassportData;
+  featured?: boolean;
   workspace?: boolean;
 };
 
@@ -162,6 +163,7 @@ function getSupplierLocation(
 function PublicPassport({
   passportId,
   example,
+  featured = false,
   workspace = false,
 }: PublicPassportProps) {
   const [passport, setPassport] =
@@ -223,7 +225,7 @@ function PublicPassport({
   async function copyPublicLink() {
     try {
       await navigator.clipboard.writeText(
-        getPassportShareUrl(),
+        getPassportShareUrl(passport?.passportId),
       );
 
       setShowShareLink(false);
@@ -316,7 +318,7 @@ function PublicPassport({
         </a>
 
         <div className="passport-header__actions">
-          {(example || workspace) && (
+          {(featured || example || workspace) && (
             <a className="passport-test-link" href={demoWorkspacePath}>← Voltar ao teste</a>
           )}
           <button
@@ -332,7 +334,7 @@ function PublicPassport({
 
           <span className="passport-verified">
             <i />
-            {workspace ? "Dados neste navegador" : example ? "Dados de exemplo" : "Registro público"}
+            {workspace ? "Dados neste navegador" : (featured || example) ? "Dados de exemplo" : "Registro público"}
           </span>
         </div>
       </header>
@@ -340,7 +342,7 @@ function PublicPassport({
       {showShareLink && (
         <div className="passport-share-fallback">
           <label htmlFor="passport-public-url">Copie o endereço do passaporte</label>
-          <input id="passport-public-url" readOnly value={getPassportShareUrl()}
+          <input id="passport-public-url" readOnly value={getPassportShareUrl(passport?.passportId)}
             onFocus={(event) => event.currentTarget.select()} />
           <button className="secondary-button" type="button" onClick={() => setShowShareLink(false)}>Fechar</button>
         </div>
@@ -613,7 +615,7 @@ function PublicPassport({
 
       <div id="compartilhar">
         <PassportQrCode passportId={passport.passportId} productName={batch.productName}
-          batchCode={batch.batchCode} example={Boolean(example)} workspace={workspace} />
+          batchCode={batch.batchCode} example={featured || Boolean(example)} workspace={workspace} />
       </div>
 
       <footer className="passport-footer">

@@ -58,7 +58,7 @@ public class WebConfig implements WebMvcConfigurer {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return false;
             }
-        }).addPathPatterns("/api/**").excludePathPatterns("/api/public/passports/{batchId}");
+        }).addPathPatterns("/api/**").excludePathPatterns("/api/public/passports/{batchId}", "/api/public/portfolio-demo");
     }
 
     @Override

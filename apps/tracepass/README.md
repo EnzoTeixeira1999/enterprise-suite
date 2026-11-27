@@ -108,3 +108,8 @@ A base de contingência combina limites municipais do IBGE e vias derivadas de �
 ## Autor
 
 Enzo Teixeira Alves · [Portfólio](https://portifolio-enzo-xi.vercel.app/pt)
+### Demonstração do portfólio
+
+Entre pelo **Acesso administrativo** e abra **Demonstração do portfólio** para manter os cadastros fictícios publicados em uma base separada. O backend salva cada alteração no PostgreSQL e detecta edições concorrentes. O passaporte em destaque em `/demo` e os links públicos dos lotes publicados leem essa base. Novos visitantes recebem uma cópia para experimentar no navegador em `/laboratorio`. O histórico administrativo, documentos e contatos ficam fora dessa cópia.
+
+A migração V9 importa o lote `ELE-SP-001` do cenário local como primeiro destaque, com os 120 volumes e sem movimentações. Em **Movimentações**, use o mapa ou **Inserir coordenadas manualmente** para registrar os pontos do trajeto.

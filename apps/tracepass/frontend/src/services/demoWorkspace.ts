@@ -10,7 +10,8 @@ type AuditEntry = {
   id: number; entity: Entity; recordId: string; action: "EDITED" | "ARCHIVED";
   reason: string | null; beforeData: string; afterData: string; recordedAt: string;
 };
-type Workspace = {
+export type Workspace = {
+  featuredBatchId?: string;
   companies: Row[];
   suppliers: Row[];
   products: Row[];
@@ -26,7 +27,7 @@ const statusAfterMovement: Record<string, string> = {
   RELEASE: "IN_STORAGE", COMPLETION: "COMPLETED",
 };
 
-function seed(): Workspace {
+export function seedDemoWorkspace(): Workspace {
   const { batch, movements, safety } = demoPassport;
   const stamp = batch.createdAt;
   const company = { id: batch.companyId, companyName: batch.companyName };
@@ -59,7 +60,7 @@ function seed(): Workspace {
 
 let workspaceCache: Workspace | undefined;
 
-function getWorkspace(): Workspace {
+export function getWorkspace(initial?: Workspace): Workspace {
   if (workspaceCache) return workspaceCache;
   try {
     const saved = window.localStorage.getItem(storageKey);
@@ -70,11 +71,11 @@ function getWorkspace(): Workspace {
   } catch {
     // A browser that blocks storage can still run the demonstration in memory.
   }
-  workspaceCache = seed();
+  workspaceCache = initial ?? seedDemoWorkspace();
   return workspaceCache;
 }
 
-function saveWorkspace(workspace: Workspace) {
+export function saveWorkspace(workspace: Workspace) {
   workspaceCache = workspace;
   try { window.localStorage.setItem(storageKey, JSON.stringify(workspace)); } catch { /* Keep in memory. */ }
 }
@@ -116,6 +117,13 @@ const editableFields: Record<Entity, string[]> = {
   movements: ["title", "description", "locationName", "responsibleName", "latitude", "longitude"],
 };
 
+function validCoordinates({ latitude, longitude }: RecordData) {
+  if (latitude == null || longitude == null) return latitude == null && longitude == null;
+  return typeof latitude === "number" && typeof longitude === "number"
+    && Number.isFinite(latitude) && Number.isFinite(longitude)
+    && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180;
+}
+
 function auditChange(workspace: Workspace, entity: Entity, row: Row, changes: RecordData, stamp: string, reason?: string) {
   if (Object.entries(changes).every(([key, value]) => (row[key] ?? null) === value)) return;
   const beforeData = JSON.stringify(row);
@@ -126,7 +134,6 @@ function auditChange(workspace: Workspace, entity: Entity, row: Row, changes: Re
     action: changes.archivedAt ? "ARCHIVED" : "EDITED", reason: reason || null,
     beforeData, afterData: JSON.stringify(row), recordedAt: stamp,
   });
-  saveWorkspace(workspace);
 }
 
 function movementsFor(workspace: Workspace, batchId: string) {
@@ -159,13 +166,19 @@ export function isDemoWorkspacePath(path = window.location.pathname) {
   return path === demoWorkspacePath || path.startsWith(demoWorkspacePath + "/");
 }
 
+let portfolioEditor = false;
+
+export function setDemoPassportLinks(enabled: boolean) {
+  portfolioEditor = enabled;
+}
+
 export function batchPassportPath(id: string) {
+  if (portfolioEditor) return "/laboratorio/publico/passport/" + id;
   return (isDemoWorkspacePath() ? demoWorkspacePath : "") + "/passport/" + id;
 }
 
-export async function requestDemoWorkspace(path: string, options?: RequestInit): Promise<Response> {
+export async function requestDemoWorkspace(path: string, options?: RequestInit, workspace = getWorkspace()): Promise<Response> {
   options?.signal?.throwIfAborted();
-  const workspace = getWorkspace();
   const method = options?.method ?? "GET";
   const [pathname, query = ""] = path.split("?", 2);
   const [, api, scope, companyId, type, productId, batchSegment, batchId, resource, incidentId, action] = pathname.split("/");
@@ -225,10 +238,12 @@ export async function requestDemoWorkspace(path: string, options?: RequestInit):
   }
 
   if (scope === "public" && companyId === "passports" && method === "GET") {
-    const batch = workspace.batches.find((row) => row.id === type);
+    const batch = type === "destaque"
+      ? active(workspace.batches).find((row) => row.id === workspace.featuredBatchId) ?? active(workspace.batches)[0]
+      : workspace.batches.find((row) => row.id === type);
     if (!batch) return error(404, "Passaporte não encontrado neste navegador.");
     const incidents = matching(workspace.incidents, "batchId", batch.id);
-    const active = activeIncidents(incidents);
+    const openIncidents = activeIncidents(incidents);
     const movements = movementsFor(workspace, batch.id);
     const visibleMovements = movements.filter((row) => !row.archivedAt);
     return Response.json({
@@ -236,10 +251,10 @@ export async function requestDemoWorkspace(path: string, options?: RequestInit):
       movements: visibleMovements, archivedMovements: movements.length - visibleMovements.length,
       generatedAt: new Date().toISOString(),
       safety: {
-        status: batch.status === "BLOCKED" ? "BLOCKED" : active.length ? "ATTENTION" : "CLEAR",
-        totalIncidents: incidents.length, activeIncidents: active.length,
-        resolvedIncidents: incidents.length - active.length,
-        criticalActiveIncidents: active.filter((row) => row.severity === "CRITICAL").length,
+        status: batch.status === "BLOCKED" ? "BLOCKED" : openIncidents.length ? "ATTENTION" : "CLEAR",
+        totalIncidents: incidents.length, activeIncidents: openIncidents.length,
+        resolvedIncidents: incidents.length - openIncidents.length,
+        criticalActiveIncidents: openIncidents.filter((row) => row.severity === "CRITICAL").length,
         hasAutomaticBlocks: incidents.some((row) => row.automaticBlock), incidents,
       },
     });
@@ -249,7 +264,6 @@ export async function requestDemoWorkspace(path: string, options?: RequestInit):
   const create = (rows: Row[], data: RecordData) => {
     const row: Row = { ...data, id: crypto.randomUUID(), createdAt: stamp, updatedAt: stamp };
     rows.push(row);
-    saveWorkspace(workspace);
     return Response.json(row, { status: 201 });
   };
 
@@ -337,8 +351,8 @@ export async function requestDemoWorkspace(path: string, options?: RequestInit):
     if (method === "GET") return Response.json(active(movementsFor(workspace, batch.id)));
     if (method === "POST") {
       if (batch.status === "BLOCKED") return error(409, "Trate as ocorrências e libere o lote antes de continuar.");
+      if (!validCoordinates(body)) return error(400, "Informe latitude e longitude válidas juntas.");
       const movement = addMovement(workspace, batch, body, stamp);
-      saveWorkspace(workspace);
       return Response.json(movement, { status: 201 });
     }
   }
@@ -360,18 +374,17 @@ export async function requestDemoWorkspace(path: string, options?: RequestInit):
       Object.assign(incident, action === "resolve"
         ? { status: "RESOLVED", resolvedAt: stamp, resolutionNotes: string(body.resolutionNotes) }
         : { status: "INVESTIGATING" }, { updatedAt: stamp, batchStatus: batch.status });
-      saveWorkspace(workspace);
       return Response.json(incident);
     }
   }
   if (resource === "release" && method === "POST") {
     if (batch.status !== "BLOCKED" || activeIncidents(incidents).length) return error(409, "Resolva as ocorrências antes de liberar o lote.");
+    if (!validCoordinates(body)) return error(400, "Informe latitude e longitude válidas juntas.");
     const movement = addMovement(workspace, batch, {
       movementType: "RELEASE", title: "Lote liberado após inspeção", description: body.releaseNotes,
       locationName: body.locationName, latitude: body.latitude, longitude: body.longitude,
       responsibleName: body.releasedBy, quantity: batch.currentQuantity, occurredAt: stamp,
     }, stamp);
-    saveWorkspace(workspace);
     return Response.json(movement, { status: 201 });
   }
   return error(404, "Ação não encontrada na demonstração.");

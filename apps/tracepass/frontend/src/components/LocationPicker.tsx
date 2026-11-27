@@ -8,6 +8,7 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import TraceMapBase from "./TraceMapBase";
+import { getPosition } from "../services/mapPosition";
 import type { LatLngTuple } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -35,41 +36,9 @@ type PickerViewportProps = {
 };
 
 const defaultCenter: LatLngTuple = [
-  -27.59487,
-  -48.54822,
+  0,
+  0,
 ];
-
-function getPosition(
-  latitude: string | number | null | undefined,
-  longitude: string | number | null | undefined,
-): LatLngTuple | null {
-  if (
-    latitude === null ||
-    latitude === undefined ||
-    latitude === "" ||
-    longitude === null ||
-    longitude === undefined ||
-    longitude === ""
-  ) {
-    return null;
-  }
-
-  const parsedLatitude = Number(latitude);
-  const parsedLongitude = Number(longitude);
-
-  if (
-    !Number.isFinite(parsedLatitude) ||
-    !Number.isFinite(parsedLongitude) ||
-    parsedLatitude < -90 ||
-    parsedLatitude > 90 ||
-    parsedLongitude < -180 ||
-    parsedLongitude > 180
-  ) {
-    return null;
-  }
-
-  return [parsedLatitude, parsedLongitude];
-}
 
 function MapClickHandler({
   onSelect,
@@ -146,6 +115,28 @@ function LocationPicker({
         )}
       </div>
 
+      <details className="location-picker__manual">
+        <summary>Inserir coordenadas manualmente</summary>
+        <p>Preencha os dois campos em graus decimais. Use o sinal − para sul e oeste.</p>
+        <div className="location-picker__coordinates">
+          <label>
+            Latitude (−90 a 90)
+            <input inputMode="decimal" value={latitude} placeholder="-23.9608"
+              onChange={(event) => onSelect(event.target.value.replace(",", "."), longitude)} />
+          </label>
+          <label>
+            Longitude (−180 a 180)
+            <input inputMode="decimal" value={longitude} placeholder="-46.3336"
+              onChange={(event) => onSelect(latitude, event.target.value.replace(",", "."))} />
+          </label>
+        </div>
+        {(latitude || longitude) && !selectedPosition && (
+          <p role="status">Informe uma latitude e uma longitude válidas.</p>
+        )}
+        {(latitude || longitude) && <button type="button" className="secondary-button"
+          onClick={() => onSelect("", "")}>Limpar coordenadas</button>}
+      </details>
+
       <div className="location-picker__map">
         <MapContainer
           center={
@@ -153,7 +144,7 @@ function LocationPicker({
             originPosition ??
             defaultCenter
           }
-          zoom={13}
+          zoom={selectedPosition || originPosition ? 13 : 2}
           scrollWheelZoom={false}
           className="location-picker__container"
         >

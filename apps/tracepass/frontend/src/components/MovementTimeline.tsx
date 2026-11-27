@@ -7,6 +7,7 @@ import {
 } from "react";
 import JourneyMap from "./JourneyMap";
 import LocationPicker from "./LocationPicker";
+import { getPosition } from "../services/mapPosition";
 import { apiFetch } from "../services/api";
 
 type CompanyOption = {
@@ -294,6 +295,12 @@ function MovementTimeline({
     ) {
       setMessageType("error");
       setMessage("Selecione uma empresa, produto e lote.");
+      return;
+    }
+
+    if ((form.latitude || form.longitude) && !getPosition(form.latitude, form.longitude)) {
+      setMessageType("error");
+      setMessage("Informe uma latitude e uma longitude válidas.");
       return;
     }
 

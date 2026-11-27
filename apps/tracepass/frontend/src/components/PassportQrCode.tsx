@@ -21,7 +21,7 @@ function PassportQrCode({
   const qrContainerRef =
     useRef<HTMLDivElement | null>(null);
 
-  const publicUrl = getPassportShareUrl();
+  const publicUrl = getPassportShareUrl(passportId);
 
   function downloadQrCode() {
     const qrCanvas =

@@ -1412,3 +1412,18 @@
 }
 :is(.journey-map, .location-picker__map) .leaflet-bar a:hover { background: #3c2332; }
 :is(.journey-map, .location-picker__map) .leaflet-bar a.leaflet-disabled { color: #ab929e; }
+
+.location-picker__manual {
+  margin-block: .75rem;
+}
+
+.location-picker__manual summary {
+  cursor: pointer;
+}
+
+.location-picker__coordinates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: .75rem;
+  margin-block: .75rem;
+}

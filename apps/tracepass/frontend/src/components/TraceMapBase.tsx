@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { GeoJSON, Pane, TileLayer } from "react-leaflet";
 import type { FeatureCollection } from "geojson";
+import world from "../assets/world-countries.json";
 import boundaries from "../assets/grande-florianopolis.json";
 import roadsUrl from "../assets/grande-florianopolis-roads.json?url";
 
@@ -40,6 +41,9 @@ export default function TraceMapBase() {
 
   return (
     <Pane name="tracepass-regional-base" style={{ zIndex: 350, pointerEvents: "none" }}>
+      <GeoJSON data={world as FeatureCollection} interactive={false}
+        attribution='<a href="https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/">Natural Earth</a>'
+        style={{ color: "#756b78", weight: 1, fillColor: "#2e2933", fillOpacity: 0.9 }} />
       <GeoJSON data={boundaries as FeatureCollection} interactive={false}
         attribution="Grande Florianópolis · IBGE"
         style={{ color: "#68616c", weight: 1, fillColor: "#302b35", fillOpacity: 1 }} />

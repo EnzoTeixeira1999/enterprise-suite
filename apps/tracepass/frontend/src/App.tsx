@@ -9,7 +9,7 @@ import {
 import "./App.css";
 import "./experience.css";
 import { demoWorkspacePath, isDemoWorkspacePath } from "./services/demoWorkspace";
-import { demoPassport, demoPath } from "./demoPassport";
+import { demoPath } from "./demoPassport";
 import ProductPanel from "./components/ProductPanel";
 import BatchOverview, { type BatchSelection } from "./components/BatchOverview";
 import routeConcept from "./assets/tracepass-route-illustration.webp";
@@ -18,7 +18,8 @@ import MovementTimeline from "./components/MovementTimeline";
 import PublicPassport from "./components/PublicPassport";
 import SupplierPanel from "./components/SupplierPanel";
 import IncidentPanel from "./components/IncidentPanel";
-import { apiFetch, setAdminToken } from "./services/api";
+import { apiFetch, setAdminToken, setEditingPortfolio } from "./services/api";
+import { setPortfolioEditor } from "./services/portfolioDemo";
 
 const previewStops = [
   { title: "Origem", description: "Registro da saída" },
@@ -103,7 +104,7 @@ const statusLabels: Record<CompanyStatus, string> = {
 
 function getPassportIdFromPath() {
   const match = window.location.pathname.match(
-    /^(?:\/laboratorio)?\/passport\/([0-9a-f-]{36})\/?$/i,
+    /^(?:\/laboratorio(?:\/publico)?)?\/passport\/([0-9a-f-]{36})\/?$/i,
   );
 
   return match?.[1] ?? null;
@@ -113,6 +114,7 @@ function App() {
   const isWorkshop = window.location.pathname.replace(/\/$/, "") === demoWorkspacePath;
   const [view, setView] = useState<View>(isWorkshop ? "dashboard" : "landing");
   const [showAudit, setShowAudit] = useState(false);
+  const [portfolioMode, setPortfolioMode] = useState(false);
   const [area, setArea] = useState<Area>(isWorkshop ? "Empresas" : "Lotes");
   const [batchRevision, setBatchRevision] = useState(0);
   const [selectedBatch, setSelectedBatch] = useState<BatchSelection>();
@@ -174,6 +176,7 @@ function App() {
         throw new Error("Não foi possível verificar o acesso. O servidor pode estar iniciando.");
       }
       setCompanies(data);
+      setPortfolioEditor(token);
       accessForm.reset();
       setAdminAccessOpen(false);
       setView("dashboard");
@@ -187,7 +190,22 @@ function App() {
     }
   }
 
+  function switchPortfolioMode(enabled: boolean) {
+    setEditingPortfolio(enabled);
+    setPortfolioMode(enabled);
+    setShowAudit(false);
+    setSelectedBatch(undefined);
+    setCompanies([]);
+    setForm(initialForm);
+    setFeedback(null);
+    setArea("Empresas");
+    void loadCompanies();
+  }
+
   function leaveDashboard() {
+    setEditingPortfolio(false);
+    setPortfolioEditor("");
+    setPortfolioMode(false);
     setAdminToken("");
     setShowAudit(false);
     setCompanies([]);
@@ -270,7 +288,7 @@ function App() {
   ).length;
 
   if (window.location.pathname.replace(/\/$/, "") === demoPath) {
-    return <PublicPassport passportId={demoPassport.passportId} example={demoPassport} />;
+    return <PublicPassport passportId="destaque" featured />;
   }
 
   const isIncidentArea = area === "Ocorrências";
@@ -286,7 +304,7 @@ function App() {
   const passportId = getPassportIdFromPath();
 
   if (passportId) {
-    return <PublicPassport passportId={passportId} workspace={isDemoWorkspacePath()} />;
+    return <PublicPassport passportId={passportId} workspace={isDemoWorkspacePath() && !window.location.pathname.startsWith("/laboratorio/publico/")} featured={window.location.pathname.startsWith("/laboratorio/publico/")} />;
   }
 
   return (
@@ -303,6 +321,10 @@ function App() {
         <div className="header__actions">
           {view === "dashboard" && !showAudit && <button className="secondary-button" type="button"
             onClick={() => setShowAudit(true)}>Histórico de alterações</button>}
+          {view === "dashboard" && !isWorkshop && <button className="secondary-button" type="button"
+            disabled={loadingCompanies} onClick={() => switchPortfolioMode(!portfolioMode)}>
+            {portfolioMode ? "Voltar à base administrativa" : "Demonstração do portfólio"}
+          </button>}
           {isWorkshop ? <a className="secondary-button" href="/">Voltar ao TracePass</a> : view === "dashboard" && (
             <button
               className="secondary-button"
@@ -386,9 +408,16 @@ function App() {
       ) : (
         <section className="dashboard">
           {showAudit ? <RecordAudit onClose={() => setShowAudit(false)} /> : <>
+          {portfolioMode && <section className="workspace-intro">
+            <div>
+              <h1>Demonstração do portfólio</h1>
+              <p>Use dados fictícios. Os cadastros salvos aqui ficam disponíveis aos visitantes.</p>
+            </div>
+            <a href={demoPath} className="landing-passport-link" target="_blank" rel="noreferrer">Ver passaporte publicado</a>
+          </section>}
           <header className="workspace-intro">
             <div>
-              <h1>{isWorkshop ? "Demonstração interativa" : "Painel de rastreabilidade"}</h1>
+              <h1>{isWorkshop ? "Demonstração interativa" : portfolioMode ? "Cadastros da demonstração" : "Painel de rastreabilidade"}</h1>
               <p>{isWorkshop
                 ? "Experimente o fluxo completo com dados fictícios. Os registros ficam neste navegador."
                 : "Cadastre, acompanhe e compartilhe os registros dos seus lotes."}</p>
@@ -481,7 +510,7 @@ function App() {
             </article>
           </section>
 
-          <section className="workspace">
+          <section className="workspace" key={portfolioMode ? "portfolio" : "regular"}>
             <article className="panel form-panel">
               <div className="panel__header">
                 <div>

@@ -3,6 +3,7 @@ import {
   type FormEvent,
 } from "react";
 import LocationPicker from "./LocationPicker";
+import { getPosition } from "../services/mapPosition";
 import { apiFetch } from "../services/api";
 
 type BatchStatus =
@@ -72,6 +73,12 @@ function BatchReleaseCard({
       setMessage(
         "Selecione um lote antes de realizar a liberação.",
       );
+      return;
+    }
+
+    if ((latitude || longitude) && !getPosition(latitude, longitude)) {
+      setMessageType("error");
+      setMessage("Informe uma latitude e uma longitude válidas.");
       return;
     }
 
