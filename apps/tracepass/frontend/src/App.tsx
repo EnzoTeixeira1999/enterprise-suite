@@ -11,6 +11,7 @@ import "./experience.css";
 import { demoWorkspacePath, isDemoWorkspacePath } from "./services/demoWorkspace";
 import { demoPath } from "./demoPassport";
 import ProductPanel from "./components/ProductPanel";
+import PassportPicker from "./components/PassportPicker";
 import BatchOverview, { type BatchSelection } from "./components/BatchOverview";
 import routeConcept from "./assets/tracepass-route-illustration.webp";
 import BatchPanel from "./components/BatchPanel";
@@ -364,7 +365,7 @@ function App() {
               <p>Por onde seu produto passou antes de chegar até você? O TracePass reúne esse caminho em um passaporte digital.</p>
               <div className="landing-demo-actions">
                 <a className="hero__demo-link" href={demoWorkspacePath}>Testar o TracePass <span aria-hidden="true">↗</span></a>
-                <a className="landing-passport-link" href={demoPath}>Ver Passaporte</a>
+                <PassportPicker />
               </div>
             </div>
             <article className="demo-preview" aria-label="Cenário ilustrativo de rastreabilidade">
@@ -413,7 +414,7 @@ function App() {
               <h1>Demonstração do portfólio</h1>
               <p>Use dados fictícios. Os cadastros salvos aqui ficam disponíveis aos visitantes.</p>
             </div>
-            <a href={demoPath} className="landing-passport-link" target="_blank" rel="noreferrer">Ver passaporte publicado</a>
+            <PassportPicker newTab />
           </section>}
           <header className="workspace-intro">
             <div>
@@ -422,7 +423,7 @@ function App() {
                 ? "Experimente o fluxo completo com dados fictícios. Os registros ficam neste navegador."
                 : "Cadastre, acompanhe e compartilhe os registros dos seus lotes."}</p>
             </div>
-            {isWorkshop && <a className="landing-passport-link" href={demoPath}>Ver Passaporte</a>}
+            {isWorkshop && <PassportPicker />}
           </header>
           {isWorkshop && (
             <details className="workspace-quickstart">

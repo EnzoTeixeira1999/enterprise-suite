@@ -1633,3 +1633,57 @@
 @media (max-width: 520px) {
   .app--dashboard .batch-overview .batch-filters { grid-template-columns: minmax(0, 1fr); }
 }
+
+.passport-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.passport-picker label {
+  display: grid;
+  gap: 5px;
+  flex: 1 1 15rem;
+  min-inline-size: 0;
+  color: #f1dce5;
+  font-size: .85rem;
+  font-weight: 650;
+}
+
+.app .passport-picker select {
+  inline-size: 100%;
+  min-block-size: 46px;
+  padding: 8px 12px;
+  border: 1px solid #88526a;
+  border-radius: 10px;
+  background: #211720;
+  color: #fff0f5;
+  color-scheme: dark;
+  font: inherit;
+}
+.app .passport-picker select:disabled { color: #c4aab8; }
+.landing-demo-actions > .passport-picker { flex-basis: 100%; }
+.passport-picker .landing-passport-link { min-block-size: 46px; white-space: nowrap; }
+
+@supports (appearance: base-select) {
+  .app .passport-picker select,
+  .app .passport-picker select::picker(select) { appearance: base-select; }
+  .app .passport-picker select { display: flex; align-items: center; gap: 8px; }
+  .app .passport-picker select::picker-icon { color: #f3a2bd; margin-inline-start: auto; }
+  .app .passport-picker select::picker(select) {
+    border: 1px solid #865369;
+    border-radius: 12px;
+    padding: 5px;
+    background: #261b24;
+    color: #f8edf2;
+    margin-block: 5px;
+  }
+  .app .passport-picker option { padding: 8px 10px; border-radius: 7px; white-space: normal; }
+  .app .passport-picker option:is(:checked, :hover, :focus-visible) {
+    background: #58283e;
+    color: #fff;
+  }
+}

@@ -29,6 +29,28 @@ function readPublic() {
   });
 }
 
+export type PublishedPassport = {
+  id: string;
+  code: string;
+  product: string;
+  featured: boolean;
+};
+
+export function publishedPassportPath(id: string) {
+  return "/laboratorio/publico/passport/" + encodeURIComponent(id);
+}
+
+export async function listPublishedPassports(): Promise<PublishedPassport[]> {
+  const { workspace } = await readPublic();
+  if (!workspace) throw new Error("Catálogo de passaportes indisponível.");
+  const products = new Map(workspace.products.map((product) => [product.id, product.name]));
+  return workspace.batches.flatMap((batch) => {
+    const product = products.get(String(batch.productId));
+    if (batch.archivedAt || typeof batch.batchCode !== "string" || typeof product !== "string") return [];
+    return [{ id: batch.id, code: batch.batchCode, product, featured: batch.id === workspace.featuredBatchId }];
+  });
+}
+
 export function setPortfolioEditor(token: string) {
   editorToken = token;
 }
