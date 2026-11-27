@@ -1,3 +1,4 @@
+import RecordActions from "./RecordActions";
 import {
   useCallback,
   useEffect,
@@ -341,8 +342,8 @@ function ProductPanel({ companies }: ProductPanelProps) {
                       <h4>{product.name}</h4>
                     </div>
 
-                    <span className="company-status company-status--active">
-                      Ativo
+                    <span className={"company-status company-status--" + (product.status === "ACTIVE" ? "active" : "inactive")}>
+                      {{ ACTIVE: "Ativo", INACTIVE: "Inativo", DISCONTINUED: "Descontinuado" }[product.status]}
                     </span>
                   </div>
 
@@ -367,7 +368,10 @@ function ProductPanel({ companies }: ProductPanelProps) {
                       <strong>{product.companyName}</strong>
                     </span>
                   </div>
-                </article>
+                  <RecordActions entity="products" record={product} name={product.name}
+                    editPath={`/api/companies/${selectedCompanyId}/products/${product.id}`}
+                    onSaved={loadProducts} />
+                  </article>
               ))}
             </div>
           )}

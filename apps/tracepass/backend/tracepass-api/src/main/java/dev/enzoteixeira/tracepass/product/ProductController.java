@@ -1,5 +1,6 @@
 package dev.enzoteixeira.tracepass.product;
 
+import dev.enzoteixeira.tracepass.audit.RecordArchiveService;
 import dev.enzoteixeira.tracepass.product.dto.CreateProductRequest;
 import dev.enzoteixeira.tracepass.product.dto.ProductResponse;
 import dev.enzoteixeira.tracepass.product.dto.UpdateProductRequest;
@@ -29,9 +30,11 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+    private final RecordArchiveService archives;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, RecordArchiveService archives) {
         this.productService = productService;
+        this.archives = archives;
     }
 
     @PostMapping
@@ -90,13 +93,14 @@ public class ProductController {
     @DeleteMapping("/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
-            summary = "Excluir produto",
-            description = "Exclui um produto pertencente a uma empresa"
+            summary = "Arquivar produto",
+            description = "Retira o registro da lista ativa e preserva o histórico"
     )
     public void delete(
             @PathVariable("companyId") UUID companyId,
             @PathVariable("productId") UUID productId
     ) {
-        productService.delete(companyId, productId);
+        productService.findById(companyId, productId);
+        archives.archive("products", productId, null);
     }
 }

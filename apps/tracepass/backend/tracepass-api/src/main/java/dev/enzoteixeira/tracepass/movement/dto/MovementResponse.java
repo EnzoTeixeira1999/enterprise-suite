@@ -24,7 +24,8 @@ public record MovementResponse(
         String responsibleName,
         BigDecimal quantity,
         OffsetDateTime occurredAt,
-        OffsetDateTime createdAt
+        OffsetDateTime createdAt,
+        OffsetDateTime archivedAt
 ) {
 
     public static MovementResponse from(Movement movement) {
@@ -55,7 +56,8 @@ public record MovementResponse(
                 movement.getResponsibleName(),
                 movement.getQuantity(),
                 movement.getOccurredAt(),
-                movement.getCreatedAt()
+                movement.getCreatedAt(),
+                movement.getArchivedAt()
         );
     }
 }

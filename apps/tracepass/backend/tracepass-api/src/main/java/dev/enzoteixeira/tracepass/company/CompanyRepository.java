@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public interface CompanyRepository extends JpaRepository<Company, UUID> {
 
+    java.util.List<Company> findAllByArchivedAtIsNull();
+
     Optional<Company> findByTaxId(String taxId);
 
     boolean existsByTaxId(String taxId);

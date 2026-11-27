@@ -1,3 +1,4 @@
+import RecordActions from "./RecordActions";
 import {
   useCallback,
   useEffect,
@@ -563,7 +564,10 @@ function SupplierPanel({
                       aos lotes
                     </small>
                   </div>
-                </article>
+                  <RecordActions entity="suppliers" record={supplier} name={supplier.tradeName}
+                    editPath={`/api/companies/${selectedCompanyId}/suppliers/${supplier.id}`}
+                    onSaved={loadSuppliers} />
+                  </article>
               ))}
             </div>
           )}

@@ -15,14 +15,24 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
+import org.hibernate.annotations.DynamicUpdate;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Entity
+@DynamicUpdate
 @Table(name = "batches")
 public class Batch {
+
+    @Column(name = "archived_at", insertable = false, updatable = false)
+    private OffsetDateTime archivedAt;
+
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
 
     @Id
     @Column(nullable = false, updatable = false)

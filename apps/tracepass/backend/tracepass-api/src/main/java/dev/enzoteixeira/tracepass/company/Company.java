@@ -17,6 +17,13 @@ import java.util.UUID;
 @Table(name = "companies")
 public class Company {
 
+    @Column(name = "archived_at", insertable = false, updatable = false)
+    private OffsetDateTime archivedAt;
+
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
     @Id
     @Column(nullable = false, updatable = false)
     private UUID id;

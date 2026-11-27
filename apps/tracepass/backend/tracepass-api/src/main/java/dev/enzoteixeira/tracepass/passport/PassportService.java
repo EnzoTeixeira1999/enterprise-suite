@@ -52,6 +52,8 @@ public class PassportService {
                 movementService.findAllPublic(
                         batchId
                 );
+        List<MovementResponse> activeMovements = movements.stream()
+                .filter(movement -> movement.archivedAt() == null).toList();
 
         List<PublicIncidentResponse> incidents =
                 incidentService.findAllPublic(
@@ -68,7 +70,8 @@ public class PassportService {
                 batch.id(),
                 "VERIFIED",
                 batch,
-                movements,
+                activeMovements,
+                movements.size() - activeMovements.size(),
                 safety,
                 OffsetDateTime.now(
                         ZoneOffset.UTC

@@ -20,6 +20,12 @@ Abra a demonstração pelo botão **Testar o TracePass** na página inicial. O c
 
 O botão **Ver Passaporte** no topo da demonstração abre uma amostra pronta. Para ver os dados que você acabou de registrar, abra o passaporte do lote correspondente em **Lotes**. Para simular avaria ou outro desvio, entre em **Ocorrências**, escolha o lote e acompanhe o registro até a resolução.
 
+### Corrija ou arquive um registro
+
+Use **Editar** para corrigir empresas, produtos, fornecedores, lotes ou movimentações. **Apagar** arquiva o registro e o retira da lista ativa. Em **Histórico de alterações**, abra um item para comparar os valores anteriores e posteriores ou consultar os dados preservados no arquivamento.
+
+Arquive primeiro os lotes vinculados antes de arquivar um produto ou fornecedor. Para arquivar uma empresa, arquive seus produtos e fornecedores primeiro. O passaporte de um lote arquivado continua acessível para consulta histórica. Eventos de bloqueio e liberação ficam protegidos no histórico de segurança.
+
 ## Como os dados se conectam
 
 ~~~mermaid

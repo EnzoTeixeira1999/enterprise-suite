@@ -63,7 +63,7 @@ public class ProductService {
         findCompany(companyId);
 
         return productRepository
-                .findAllByCompany_IdOrderByCreatedAtDesc(companyId)
+                .findAllByCompany_IdAndArchivedAtIsNullOrderByCreatedAtDesc(companyId)
                 .stream()
                 .map(ProductResponse::from)
                 .toList();
@@ -112,15 +112,6 @@ public class ProductService {
                 productRepository.saveAndFlush(product);
 
         return ProductResponse.from(updatedProduct);
-    }
-
-    @Transactional
-    public void delete(
-            UUID companyId,
-            UUID productId
-    ) {
-        Product product = findProduct(companyId, productId);
-        productRepository.delete(product);
     }
 
     private Company findCompany(UUID companyId) {

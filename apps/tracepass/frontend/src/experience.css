@@ -1357,6 +1357,49 @@
 .demo-guide-list h3 { margin: 2px 0 5px; font-size: .95rem; }
 .demo-guide-list p { margin: 0; color: #d2c2cc; font-size: .86rem; line-height: 1.55; }
 
+.record-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.company-item > .record-actions { grid-column: 1 / -1; margin-top: 0; }
+.app--dashboard .record-actions > button { min-height: 40px; width: auto; margin: 0; }
+.app--dashboard .record-actions > .record-actions__archive { border-color: #794054; color: #ff9eae; }
+.record-actions > button:disabled { opacity: .45; cursor: not-allowed; }
+
+.record-dialog {
+  width: min(38rem, calc(100vw - 24px));
+  max-height: 88dvh;
+  margin: auto;
+  padding: clamp(14px, 3vw, 24px);
+  border: 1px solid #835466;
+  border-radius: 14px;
+  background: #1c151d;
+  color: #f4efea;
+  overflow: auto;
+}
+.record-dialog::backdrop { background: #080609cc; }
+.record-dialog h3, .record-dialog p { margin: 0 0 10px; overflow-wrap: anywhere; }
+.record-dialog p { color: #d2c2cc; line-height: 1.5; }
+.record-dialog .record-dialog__error { color: #ff9eae; }
+.record-dialog__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 12px; }
+.app--dashboard .record-dialog label { display: grid; min-width: 0; gap: 5px; color: #ecd3de; font-size: .87rem; }
+.app--dashboard .record-dialog :is(input, select, textarea) {
+  width: 100%; min-width: 0; margin: 0; padding: 9px 11px; border: 1px solid #745162;
+  border-radius: 8px; background: #141016; color: #f4efea; font: inherit;
+}
+
+.record-audit { display: grid; gap: 12px; }
+.record-audit > header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 12px; }
+.record-audit h2, .record-audit p { margin: 0; }
+.record-audit p { color: #d2c2cc; }
+.record-audit__entry { border: 1px solid #513745; border-radius: 10px; background: #211720; }
+.record-audit__entry > summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 14px; cursor: pointer; }
+.record-audit__entry > summary small, .record-audit__entry > summary > span:last-child { color: #edb3c9; }
+.record-audit__entry > summary::before { content: "▸"; color: #edb3c9; }
+.record-audit__entry[open] > summary::before { content: "▾"; }
+.record-audit__entry > summary > span:first-of-type { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.record-audit__details { padding: 0 14px 14px; overflow: auto; }
+.record-audit__details p { margin: 6px 0; overflow-wrap: anywhere; }
+.record-audit__details table { margin-top: 9px; width: 100%; border-collapse: collapse; table-layout: fixed; }
+.record-audit__details :is(td, th) { padding: 7px; border-bottom: 1px solid #513745; text-align: left; overflow-wrap: anywhere; }
+
 :is(.app, .public-passport) :is(button, a, summary, input, select, textarea):focus-visible {
   outline: 2px solid #ff9eba;
   outline-offset: 3px;
