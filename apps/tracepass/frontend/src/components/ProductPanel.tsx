@@ -1,3 +1,4 @@
+import SelectionContext from "./SelectionContext";
 import RecordActions from "./RecordActions";
 import {
   useCallback,
@@ -193,25 +194,28 @@ function ProductPanel({ companies }: ProductPanelProps) {
           </span>
         </div>
 
-        <label>
-          Empresa selecionada
-          <select
-            value={selectedCompanyId}
-            onChange={(event) =>
-              setSelectedCompanyId(event.target.value)
-            }
-          >
-            {companies.length === 0 && (
-              <option value="">Nenhuma empresa cadastrada</option>
-            )}
+        <SelectionContext title="Empresa do catálogo" hint={companies.length === 0 ? "Cadastre uma empresa na etapa Empresas para continuar." : "Os produtos cadastrados e a lista abaixo pertencem à empresa exibida."}>
+          <label>
+            Empresa
+            <select
+              value={selectedCompanyId}
+              disabled={companies.length === 0}
+              onChange={(event) =>
+                setSelectedCompanyId(event.target.value)
+              }
+            >
+              {companies.length === 0 && (
+                <option value="">Nenhuma empresa cadastrada</option>
+              )}
 
-            {companies.map((company) => (
-              <option value={company.id} key={company.id}>
-                {company.tradeName}
-              </option>
-            ))}
-          </select>
-        </label>
+              {companies.map((company) => (
+                <option value={company.id} key={company.id}>
+                  {company.tradeName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </SelectionContext>
       </div>
 
       <div className="product-workspace">

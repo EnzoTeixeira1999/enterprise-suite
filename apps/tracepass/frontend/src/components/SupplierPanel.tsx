@@ -1,3 +1,4 @@
+import SelectionContext from "./SelectionContext";
 import RecordActions from "./RecordActions";
 import {
   useCallback,
@@ -262,33 +263,36 @@ function SupplierPanel({
           </span>
         </div>
 
-        <label>
-          Empresa
-          <select
-            value={selectedCompanyId}
-            onChange={(event) => {
-              setSelectedCompanyId(
-                event.target.value,
-              );
-              setSuppliers([]);
-            }}
-          >
-            {companies.length === 0 && (
-              <option value="">
-                Nenhuma empresa
-              </option>
-            )}
+        <SelectionContext title="Empresa dos fornecedores" hint={companies.length === 0 ? "Cadastre uma empresa na etapa Empresas para continuar." : "Os fornecedores cadastrados e a lista abaixo pertencem à empresa exibida."}>
+          <label>
+            Empresa
+            <select
+              value={selectedCompanyId}
+              disabled={companies.length === 0}
+              onChange={(event) => {
+                setSelectedCompanyId(
+                  event.target.value,
+                );
+                setSuppliers([]);
+              }}
+            >
+              {companies.length === 0 && (
+                <option value="">
+                  Nenhuma empresa cadastrada
+                </option>
+              )}
 
-            {companies.map((company) => (
-              <option
-                value={company.id}
-                key={company.id}
-              >
-                {company.tradeName}
-              </option>
-            ))}
-          </select>
-        </label>
+              {companies.map((company) => (
+                <option
+                  value={company.id}
+                  key={company.id}
+                >
+                  {company.tradeName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </SelectionContext>
       </div>
 
       <section className="supplier-metrics">

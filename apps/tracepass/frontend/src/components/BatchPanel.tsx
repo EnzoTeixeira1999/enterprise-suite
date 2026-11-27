@@ -1,3 +1,4 @@
+import SelectionContext from "./SelectionContext";
 import RecordActions from "./RecordActions";
 import {
   useCallback,
@@ -512,12 +513,13 @@ function BatchPanel({
           </span>
         </div>
 
-        <div className="batch-filters">
+        <SelectionContext title="Produto dos lotes" hint={companies.length === 0 ? "Cadastre uma empresa na etapa Empresas para continuar." : "Confira a empresa e o produto antes de cadastrar ou consultar um lote."}>
           <label>
-            Empresa
+            <span><b aria-hidden="true">1</b> Empresa</span>
 
             <select
               value={selectedCompanyId}
+              disabled={companies.length === 0}
               onChange={(event) => {
                 setSelectedCompanyId(
                   event.target.value,
@@ -536,7 +538,7 @@ function BatchPanel({
             >
               {companies.length === 0 && (
                 <option value="">
-                  Nenhuma empresa
+                  Nenhuma empresa cadastrada
                 </option>
               )}
 
@@ -552,7 +554,7 @@ function BatchPanel({
           </label>
 
           <label>
-            Produto
+            <span><b aria-hidden="true">2</b> Produto</span>
 
             <select
               value={selectedProductId}
@@ -568,7 +570,7 @@ function BatchPanel({
             >
               {products.length === 0 && (
                 <option value="">
-                  Nenhum produto
+                  {!selectedCompanyId ? "Escolha uma empresa primeiro" : loadingProducts ? "Carregando produtos…" : "Nenhum produto nesta empresa"}
                 </option>
               )}
 
@@ -582,7 +584,7 @@ function BatchPanel({
               ))}
             </select>
           </label>
-        </div>
+        </SelectionContext>
       </div>
 
       <div className="batch-workspace">

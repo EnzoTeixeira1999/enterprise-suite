@@ -1427,3 +1427,209 @@
   gap: .75rem;
   margin-block: .75rem;
 }
+
+/* Seleção de contexto e menus nativos */
+.app--dashboard :is(.product-module__heading, .supplier-module__heading, .batch-module__heading,
+.movement-module__heading, .incident-module__heading) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.selection-context {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 10px clamp(14px, 2vw, 22px) 18px;
+  border: 1px solid #704353;
+  border-radius: 14px;
+  background: #201820;
+}
+
+.selection-context > legend {
+  padding: 0 7px;
+  color: #faafc6;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.app--dashboard .selection-context > p {
+  margin: 0 0 12px;
+  color: #d8c5cf;
+  font-size: .9rem;
+  letter-spacing: normal;
+  line-height: 1.45;
+  text-transform: none;
+}
+
+.selection-context__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 12px;
+}
+
+.selection-context__fields > label {
+  display: grid;
+  min-inline-size: 0;
+  gap: 6px;
+  align-content: start;
+  color: #f1dce5;
+  font-size: .88rem;
+  font-weight: 650;
+}
+
+.selection-context__fields > label > span { display: flex; gap: 7px; align-items: center; }
+.selection-context__fields b {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.35rem;
+  block-size: 1.35rem;
+  border-radius: 50%;
+  background: #84304c;
+  color: #fff;
+  font-size: .72rem;
+}
+
+:is(.app--dashboard, .passport-redesign) select {
+  color-scheme: dark;
+  min-inline-size: 0;
+  min-block-size: 46px;
+  border-radius: 11px;
+}
+
+.app--dashboard .selection-context select {
+  width: 100%;
+  min-block-size: 54px;
+  padding: 10px 13px;
+  border-color: #88526a;
+  background: #181218;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 680;
+}
+
+:is(.app--dashboard, .passport-redesign) select:not(:disabled) { cursor: pointer; }
+:is(.app--dashboard, .passport-redesign) select:disabled {
+  opacity: 1;
+  color: #baabb4;
+  border-color: #513b48;
+  background: #211920;
+}
+
+:is(.app--dashboard, .passport-redesign) select option {
+  color: #f8edf2;
+  background: #261b24;
+}
+
+@supports (appearance: base-select) {
+  :is(.app--dashboard, .passport-redesign) select,
+  :is(.app--dashboard, .passport-redesign) select::picker(select) { appearance: base-select; }
+
+  :is(.app--dashboard, .passport-redesign) select::picker(select) {
+    margin-block: 5px;
+    padding: 5px;
+    border: 1px solid #865369;
+    border-radius: 12px;
+    background: #261b24;
+    color: #f8edf2;
+    box-shadow: 0 12px 28px #070409a6;
+    max-block-size: min(20rem, 58dvh);
+    overflow: auto;
+  }
+
+  :is(.app--dashboard, .passport-redesign) select::picker-icon { color: #f3a2bd; }
+  :is(.app--dashboard, .passport-redesign) select:disabled::picker-icon { color: #9c8792; }
+  :is(.app--dashboard, .passport-redesign) select option {
+    min-block-size: 38px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    white-space: normal;
+  }
+
+  :is(.app--dashboard, .passport-redesign) select option:checked { background: #58283e; color: #fff; font-weight: 700; }
+  :is(.app--dashboard, .passport-redesign) select option:is(:hover, :focus-visible) { background: #74364f; color: #fff; }
+}
+
+/* Valores e setas alinhados no centro vertical dos seletores personalizáveis. */
+@supports (appearance: base-select) {
+  :is(.app--dashboard, .passport-redesign) select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.25;
+  }
+
+  :is(.app--dashboard, .passport-redesign) select::picker-icon {
+    flex: none;
+    margin-inline-start: auto;
+  }
+}
+
+.app--dashboard .batch-overview .batch-filters {
+  display: grid;
+  grid-template-columns: minmax(15rem, 2.25fr) minmax(10rem, 1.25fr) repeat(2, minmax(8rem, 1fr));
+  align-items: end;
+  gap: 10px 14px;
+  margin: 16px 0 20px;
+  padding: 14px;
+  border: 1px solid #523744;
+  border-radius: 12px;
+  background: #211820;
+}
+
+.batch-overview .batch-filters > label {
+  min-width: 0;
+  width: auto;
+  color: #ecd3de;
+  font-size: .88rem;
+  line-height: 1.35;
+}
+
+.app--dashboard .batch-overview .batch-filters :is(input[type="search"], select) {
+  width: 100%;
+  height: 46px;
+  min-height: 46px;
+  padding: 8px 12px;
+  border: 1px solid #674856;
+  border-radius: 9px;
+  background: #181219;
+  color: #f8edf2;
+  font: inherit;
+}
+
+.batch-overview .batch-filters input[type="search"]::placeholder { color: #c1afb8; }
+.batch-overview .batch-filters__check { grid-column: 1 / -1; min-height: 26px; gap: 8px; }
+.batch-overview .batch-filters__check input { accent-color: #b82954; }
+
+.batch-table {
+  border: 1px solid #4b3542;
+  border-radius: 12px;
+}
+
+.batch-table table { min-width: 720px; }
+.batch-table th, .batch-table td { padding: 12px 14px; border-color: #4b3542; }
+.batch-table thead th { background: #28202a; color: #e6cbd7; font-size: .82rem; }
+.batch-table td { vertical-align: middle; font-size: .9rem; line-height: 1.4; }
+.batch-table tr:last-child td { border-bottom: 0; }
+.batch-table tbody tr:hover { background: #241b24; }
+.batch-table :is(td > strong, td > small, td > time) { display: block; overflow-wrap: anywhere; }
+.batch-table :is(small, time) { margin-top: 4px; color: #cdbbc5; font-size: .79rem; }
+.batch-table time { font-variant-numeric: tabular-nums; }
+.batch-table .route-select { min-height: 38px; padding: 7px 10px; white-space: nowrap; }
+.batch-table__status { display: inline-block; padding: 4px 8px; border-radius: 8px; background: #322430; color: #f5dce6; white-space: nowrap; font-size: .8rem; }
+.batch-table__status[data-status="BLOCKED"] { background: #4c2430; color: #ffa9b7; }
+.batch-table__status[data-status="EXPIRED"] { background: #403123; color: #ffda93; }
+.batch-table .batch-table__count { color: #fff; font-variant-numeric: tabular-nums; }
+.batch-table__count[data-attention="true"] { color: #ffd36a; }
+
+.batch-detail dl { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 10px 0; }
+.batch-detail dt { color: #cdbbc5; font-size: .8rem; }
+.batch-detail dd { margin: 0; }
+
+@media (max-width: 950px) {
+  .app--dashboard .batch-overview .batch-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .batch-filters__search { grid-column: 1 / -1; }
+}
+
+@media (max-width: 520px) {
+  .app--dashboard .batch-overview .batch-filters { grid-template-columns: minmax(0, 1fr); }
+}

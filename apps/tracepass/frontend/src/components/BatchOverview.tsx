@@ -9,6 +9,9 @@ const statuses = {
   BLOCKED: "Bloqueado", COMPLETED: "Concluído", EXPIRED: "Vencido",
 };
 
+const eventDate = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" });
+const eventTime = new Intl.DateTimeFormat("pt-BR", { timeStyle: "short" });
+
 type BatchRow = BatchSelection & {
   batchCode: string;
   productName: string;
@@ -73,18 +76,18 @@ export default function BatchOverview({ companies, onOpenArea, revision }: Props
   return (
     <section className="batch-overview" aria-labelledby="batch-overview-title">
       <div className="batch-overview__heading">
-        <h2 id="batch-overview-title">Lotes</h2>
+        <h2 id="batch-overview-title">Base de lotes</h2>
         {companyId && <button className="secondary-button" type="button" disabled={loading}
           onClick={() => setAttempt((current) => current + 1)}>Atualizar lotes</button>}
       </div>
       {companies.length === 0 ? <p>Cadastre uma empresa para acompanhar seus lotes.</p> : (
         <>
           <div className="batch-filters">
+            <label className="batch-filters__search">Pesquisar lote<input type="search" value={query} onChange={(event) => setQuery(event.target.value)}
+              placeholder="Código do lote, produto ou SKU" /></label>
             <label>Empresa<select value={companyId} onChange={(event) => { setRows([]); setSelected(""); setChosenCompany(event.target.value); }}>
               {companies.map((company) => <option key={company.id} value={company.id}>{company.tradeName}</option>)}
             </select></label>
-            <label>Pesquisar<input value={query} onChange={(event) => setQuery(event.target.value)}
-              placeholder="Código, produto ou SKU" /></label>
             <label>Status<select value={status} onChange={(event) => setStatus(event.target.value)}>
               <option value="">Todos</option>
               {Object.entries(statuses).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
@@ -101,16 +104,20 @@ export default function BatchOverview({ companies, onOpenArea, revision }: Props
             onClick={() => setAttempt((current) => current + 1)}>Tentar novamente</button></p>}
           {!loading && !error && visible.length === 0 && <p>{rows.length ? "Nenhum lote corresponde aos filtros." : "Nenhum lote cadastrado nesta empresa."}</p>}
           {!loading && !error && visible.length > 0 && (
-            <div className="batch-table">
+            <div className="batch-table" role="region" aria-label="Resultados da Base de lotes" tabIndex={0}>
               <table>
                 <thead><tr>{["Lote", "Produto", "Status", "Último evento", "Local", "Ocorrências ativas"].map((label) =>
                   <th key={label} scope="col">{label}</th>)}</tr></thead>
                 <tbody>{visible.map((row) => <tr key={row.id}>
                   <td><button type="button" className="route-select" aria-expanded={selected === row.id}
-                    onClick={() => setSelected(selected === row.id ? "" : row.id)}>{row.batchCode}</button></td>
-                  <td>{row.productName}<small>{row.sku}</small></td><td>{statuses[row.status]}</td>
-                  <td>{row.lastEvent ?? "—"}{row.lastOccurredAt && <small>{new Date(row.lastOccurredAt).toLocaleString("pt-BR")}</small>}</td>
-                  <td>{row.lastLocation ?? "—"}</td><td>{row.openIncidents}</td>
+                    onClick={() => setSelected(selected === row.id ? "" : row.id)}><code>{row.batchCode}</code></button></td>
+                  <td><strong>{row.productName}</strong><small>SKU {row.sku}</small></td>
+                  <td><span className="batch-table__status" data-status={row.status}>{statuses[row.status]}</span></td>
+                  <td><strong>{row.lastEvent ?? "Sem evento registrado"}</strong>{row.lastOccurredAt && <time dateTime={row.lastOccurredAt}>
+                    {eventDate.format(new Date(row.lastOccurredAt))} às {eventTime.format(new Date(row.lastOccurredAt))}
+                  </time>}</td>
+                  <td>{row.lastLocation ?? "Não informado"}</td>
+                  <td><strong className="batch-table__count" data-attention={row.openIncidents > 0}>{row.openIncidents}</strong></td>
                 </tr>)}</tbody>
               </table>
             </div>
@@ -118,8 +125,12 @@ export default function BatchOverview({ companies, onOpenArea, revision }: Props
           {batch && (
             <section className="batch-detail" aria-label={"Ficha do lote " + batch.batchCode}>
               <h3>{batch.batchCode}</h3>
-              <p>{batch.productName} · {statuses[batch.status]} · Validade: {batch.expirationDate
-                ? new Date(batch.expirationDate + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"}</p>
+              <dl>
+                <div><dt>Produto</dt><dd>{batch.productName}</dd></div>
+                <div><dt>Status</dt><dd>{statuses[batch.status]}</dd></div>
+                <div><dt>Validade</dt><dd>{batch.expirationDate
+                  ? eventDate.format(new Date(batch.expirationDate + "T12:00:00")) : "Não informada"}</dd></div>
+              </dl>
               <div className="dashboard-nav">
                 <button type="button" onClick={() => onOpenArea(batch, "Movimentações")}>Movimentações</button>
                 <button type="button" onClick={() => onOpenArea(batch, "Ocorrências")}>Ocorrências</button>

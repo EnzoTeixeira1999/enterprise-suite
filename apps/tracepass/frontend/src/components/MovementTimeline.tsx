@@ -1,3 +1,4 @@
+import SelectionContext from "./SelectionContext";
 import RecordActions from "./RecordActions";
 import {
   useCallback,
@@ -148,7 +149,7 @@ function MovementTimeline({
     }
   }, [companies, selectedCompanyId]);
 
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (signal: AbortSignal) => {
     if (!selectedCompanyId) {
       setProducts([]);
       return;
@@ -156,7 +157,7 @@ function MovementTimeline({
 
     try {
       const response = await apiFetch(
-        `/api/companies/${selectedCompanyId}/products`,
+        `/api/companies/${selectedCompanyId}/products`, { signal },
       );
 
       if (!response.ok) {
@@ -164,9 +165,11 @@ function MovementTimeline({
       }
 
       const data: Product[] = await response.json();
+      if (signal.aborted) return;
       setProducts(data);
       setProductsReady(true);
     } catch {
+      if (signal.aborted) return;
       setProductsReady(true);
       setProducts([]);
       setMessageType("error");
@@ -175,7 +178,9 @@ function MovementTimeline({
   }, [selectedCompanyId]);
 
   useEffect(() => {
-    void loadProducts();
+    const controller = new AbortController();
+    void loadProducts(controller.signal);
+    return () => controller.abort();
   }, [loadProducts]);
 
   useEffect(() => {
@@ -195,7 +200,7 @@ function MovementTimeline({
     }
   }, [products, productsReady, selectedProductId]);
 
-  const loadBatches = useCallback(async () => {
+  const loadBatches = useCallback(async (signal: AbortSignal) => {
     if (!selectedCompanyId || !selectedProductId) {
       setBatches([]);
       return;
@@ -203,7 +208,7 @@ function MovementTimeline({
 
     try {
       const response = await apiFetch(
-        `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`,
+        `/api/companies/${selectedCompanyId}/products/${selectedProductId}/batches`, { signal },
       );
 
       if (!response.ok) {
@@ -211,9 +216,11 @@ function MovementTimeline({
       }
 
       const data: Batch[] = await response.json();
+      if (signal.aborted) return;
       setBatches(data);
       setBatchesReady(true);
     } catch {
+      if (signal.aborted) return;
       setBatchesReady(true);
       setBatches([]);
       setMessageType("error");
@@ -222,7 +229,9 @@ function MovementTimeline({
   }, [selectedCompanyId, selectedProductId]);
 
   useEffect(() => {
-    void loadBatches();
+    const controller = new AbortController();
+    void loadBatches(controller.signal);
+    return () => controller.abort();
   }, [loadBatches]);
 
   useEffect(() => {
@@ -406,17 +415,23 @@ function MovementTimeline({
           </span>
         </div>
 
-        <div className="movement-filters">
+        <SelectionContext title="Lote da movimentação" hint={companies.length === 0 ? "Cadastre uma empresa na etapa Empresas para continuar." : "Confira empresa, produto e lote. O novo evento será registrado neste lote."}>
           <label>
-            Empresa
+            <span><b aria-hidden="true">1</b> Empresa</span>
             <select
               value={selectedCompanyId}
+              disabled={companies.length === 0}
               onChange={(event) => {
                 setSelectedCompanyId(event.target.value);
                 setSelectedProductId("");
                 setSelectedBatchId("");
+                setProducts([]);
+                setBatches([]);
+                setProductsReady(false);
+                setBatchesReady(false);
               }}
             >
+              {companies.length === 0 && <option value="">Nenhuma empresa cadastrada</option>}
               {companies.map((company) => (
                 <option
                   value={company.id}
@@ -429,17 +444,19 @@ function MovementTimeline({
           </label>
 
           <label>
-            Produto
+            <span><b aria-hidden="true">2</b> Produto</span>
             <select
               value={selectedProductId}
               onChange={(event) => {
                 setSelectedProductId(event.target.value);
                 setSelectedBatchId("");
+                setBatches([]);
+                setBatchesReady(false);
               }}
-              disabled={products.length === 0}
+              disabled={!productsReady || products.length === 0}
             >
               {products.length === 0 && (
-                <option value="">Nenhum produto</option>
+                <option value="">{!selectedCompanyId ? "Escolha uma empresa primeiro" : !productsReady ? "Carregando produtos…" : "Nenhum produto nesta empresa"}</option>
               )}
 
               {products.map((product) => (
@@ -454,16 +471,16 @@ function MovementTimeline({
           </label>
 
           <label>
-            Lote
+            <span><b aria-hidden="true">3</b> Lote</span>
             <select
               value={selectedBatchId}
               onChange={(event) =>
                 setSelectedBatchId(event.target.value)
               }
-              disabled={batches.length === 0}
+              disabled={!batchesReady || batches.length === 0}
             >
               {batches.length === 0 && (
-                <option value="">Nenhum lote</option>
+                <option value="">{!selectedProductId ? "Escolha um produto primeiro" : !batchesReady ? "Carregando lotes…" : "Nenhum lote neste produto"}</option>
               )}
 
               {batches.map((batch) => (
@@ -476,7 +493,7 @@ function MovementTimeline({
               ))}
             </select>
           </label>
-        </div>
+        </SelectionContext>
       </div>
 
       <div className="movement-workspace">

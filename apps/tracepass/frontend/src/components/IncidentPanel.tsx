@@ -1,3 +1,4 @@
+import SelectionContext from "./SelectionContext";
 import {
   useCallback,
   useEffect,
@@ -764,12 +765,13 @@ function IncidentPanel({
           </span>
         </div>
 
-        <div className="incident-filters">
+        <SelectionContext title="Lote da ocorrência" hint={companies.length === 0 ? "Cadastre uma empresa na etapa Empresas para continuar." : "Confira empresa, produto e lote antes de consultar ou registrar um desvio."}>
           <label>
-            Empresa
+            <span><b aria-hidden="true">1</b> Empresa</span>
 
             <select
               value={selectedCompanyId}
+              disabled={companies.length === 0}
               onChange={(event) => {
                 setSelectedCompanyId(
                   event.target.value,
@@ -784,7 +786,7 @@ function IncidentPanel({
             >
               {companies.length === 0 && (
                 <option value="">
-                  Nenhuma empresa
+                  Nenhuma empresa cadastrada
                 </option>
               )}
 
@@ -800,7 +802,7 @@ function IncidentPanel({
           </label>
 
           <label>
-            Produto
+            <span><b aria-hidden="true">2</b> Produto</span>
 
             <select
               value={selectedProductId}
@@ -820,7 +822,7 @@ function IncidentPanel({
             >
               {products.length === 0 && (
                 <option value="">
-                  Nenhum produto
+                  {!selectedCompanyId ? "Escolha uma empresa primeiro" : loadingProducts ? "Carregando produtos…" : "Nenhum produto nesta empresa"}
                 </option>
               )}
 
@@ -836,7 +838,7 @@ function IncidentPanel({
           </label>
 
           <label>
-            Lote
+            <span><b aria-hidden="true">3</b> Lote</span>
 
             <select
               value={selectedBatchId}
@@ -852,7 +854,7 @@ function IncidentPanel({
             >
               {batches.length === 0 && (
                 <option value="">
-                  Nenhum lote
+                  {!selectedProductId ? "Escolha um produto primeiro" : loadingBatches ? "Carregando lotes…" : "Nenhum lote neste produto"}
                 </option>
               )}
 
@@ -869,7 +871,7 @@ function IncidentPanel({
               ))}
             </select>
           </label>
-        </div>
+        </SelectionContext>
       </div>
 
       <div className="incident-metrics">
